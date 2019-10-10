@@ -18,10 +18,16 @@ public class Semantic{
 	public Semantic(AST.program program){
 		// first as mentioned in instructions we check if all the properties related to
 		// class inheritance holds for the given ast
+
+		// the constructor of this class takes the AST.program as an argument using which the inheritance
+		// graph is built, while building, basic checks on classes are also done.
 		InheritanceGraph IG = new InheritanceGraph(program);
-		IG.printInheritanceGraph();
-		if(IG.containsCycle())
-			System.out.println("There are cycles! :(");
-		else System.out.println("No cycles! :)");
+		// IG.printInheritanceGraph();
+
+		// check if the inheritance graph containts any loops
+		if(IG.containsCycle()) {
+			ErrorReporter.reportGenericError("There is a cycle in the inheritance graph");
+			System.exit(1);			
+		}
 	}
 }

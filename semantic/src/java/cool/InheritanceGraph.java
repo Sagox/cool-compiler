@@ -48,18 +48,20 @@ public class InheritanceGraph {
 		adjacencyList[numberOfNodes+1] = new LinkedList<>();
 		for(int i=0;i<numberOfNodes;i++) {
 			String className = program.classes.get(i).name, parentClassName = program.classes.get(i).parent;
-			checkClassName(className);
-			checkParentClassName(parentClassName);
+			checkClass(program.classes.get(i));
+			checkParentClass(program.classes.get(i));
 			classIDs.put(className, i);
 			adjacencyList[i] = new LinkedList<>();
 		}
 
 		// adding edges to the adjacency list
 		for(int i=0;i<numberOfNodes;i++) {
-			if(classIDs.containsKey(program.classes.get(i).parent)) {
-				adjacencyList[classIDs.get(program.classes.get(i).parent)].add(i);
+			AST.class_ currentClass = program.classes.get(i); 
+			if(classIDs.containsKey(currentClass.parent)) {
+				adjacencyList[classIDs.get(currentClass.parent)].add(i);
 			} else {
-				System.out.println("Parent does not exist?\n");
+				ErrorReporter.reportError(currentClass.filename, currentClass.lineNo, "Parent does not exist");
+				System.exit(1);
 			}
 		}
 
@@ -79,25 +81,27 @@ public class InheritanceGraph {
 	}
 
 	// check for the correctness of the class name before adding it to the inheritance graph
-	Boolean checkClassName(String className) {
+	void checkClass(AST.class_ currentClass) {
+		String className = currentClass.name;
 		// the basic classes cannot be redefined
 		if(basicClasses.contains(className)) {
-			System.out.println("Cannot redefine basic class\n");
-			return false;
+			ErrorReporter.reportError(currentClass.filename, currentClass.lineNo, "Class name is not allowed");
+			System.exit(1);
 		// the same class cannot be defined multiple times
 		} else if(classIDs.containsKey(className)) {
-			System.out.println("Cannot redefine class\n");
-			return false;
-		} else return true;
+			ErrorReporter.reportError(currentClass.filename, currentClass.lineNo, "Class redefinition is not allowed");
+			System.exit(1);
+		}
 	}
 
 	// check got the correctness of the parent class before adding it to the inheritance graph
-	Boolean checkParentClassName(String parentClassName) {
+	void checkParentClass(AST.class_ currentClass) {
+		String parentClassName = currentClass.parent;
 		if(cannotInheritFrom.contains(parentClassName)) {
 			// some classes cannot be inherited from according to the cool specification
-			System.out.println("Invalid Inheritance");
-			return false;
-		} else return true;
+			ErrorReporter.reportError(currentClass.filename, currentClass.lineNo, "Attemp to inherit from invalid class");
+			System.exit(1);
+		}
 	}
 
 
