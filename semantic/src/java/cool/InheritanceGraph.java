@@ -71,7 +71,7 @@ public class InheritanceGraph {
 	void printInheritanceGraph() {
 		System.out.println("Number of nodes " + numberOfNodes + "\n");
 		// print out the entire adjacency list
-		for(int i=0;i<numberOfNodes;i++) {
+		for(int i=0;i<numberOfNodes+2;i++) {
 			System.out.print(i + ": ");
 			for(int j=0;j<adjacencyList[i].size();j++) {
 				System.out.print(adjacencyList[i].get(j) + " ");
