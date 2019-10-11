@@ -19,7 +19,7 @@ public class ScopeTable<T> {
 			maps.remove(scope);
 			scope--;
 		}
-	}	
+	}
 	T lookUpLocal(String t){
 		return maps.get(scope).get(t);
 	}

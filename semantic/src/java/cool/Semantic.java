@@ -27,7 +27,11 @@ public class Semantic{
 		// check if the inheritance graph containts any loops
 		if(IG.containsCycle()) {
 			ErrorReporter.reportGenericError("There is a cycle in the inheritance graph");
-			System.exit(1);			
+			System.exit(1);
 		}
+
+		ClassTable CT = new ClassTable(program);
+		ScopeTableImpl ST = new ScopeTableImpl(program, IG, CT);
+
 	}
 }
