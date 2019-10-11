@@ -22,7 +22,7 @@ public class Semantic{
 		// the constructor of this class takes the AST.program as an argument using which the inheritance
 		// graph is built, while building, basic checks on classes are also done.
 		InheritanceGraph IG = new InheritanceGraph(program);
-		// IG.printInheritanceGraph();
+		IG.printInheritanceGraph();
 
 		// check if the inheritance graph containts any loops
 		if(IG.containsCycle()) {
