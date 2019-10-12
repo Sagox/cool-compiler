@@ -1,3 +1,6 @@
+(*
+  Multiple class definition
+  *)
 Class A {
   a : Int;
   c : Bool;

@@ -35,15 +35,7 @@ public class Semantic{
 		ClassTable CT = new ClassTable(program);
 		// Generate scope table using class Table and assign types wherever necessary.
 		ScopeTableImpl ST = new ScopeTableImpl(program, IG, CT);
-		// check for main function
-		// ClassNode mainClass = clsInfo.cls.get("Main");
-		      // System.out.print("checking node bfs: " + CT.cnHm);
-        // System.out.print("\n");
-		// Check for Main and main
-		if(CT.cnHm.get("Main") == null) {
-			reportError(filename, 1, "Class 'Main' is not present");
-		} else if(CT.cnHm.get("Main").methods.containsKey("main") == false) {
-			reportError(filename, 1, " method 'main' is missing in 'Main' class");
-		}
+    // System.out.print("checking node bfs: " + CT.cnHm);
+    // System.out.print("\n");
 	}
 }

@@ -1,0 +1,6 @@
+(*
+no main
+ *)
+class Main {
+};
+

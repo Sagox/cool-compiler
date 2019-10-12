@@ -98,36 +98,38 @@ public class ClassTable {
     // inherited re-definitions
     // method
     for(String currMethodName : currMethods.keySet()) {
+      boolean flag = true;
       if(currNode.methods.containsKey(currMethodName)) {
+        System.out.print("checking node method: " + currMethodName);
+        System.out.print("\n");
         AST.method currMethod = currMethods.get(currMethodName);
         AST.method parentMethod = currNode.methods.get(currMethodName);
         // number of parameters
         if(currMethod.formals.size() != parentMethod.formals.size()) {
           // check
           ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Incorrect number of arguments in child class's method - '" + currMethod.name + "'");
-          continue;
-        }
-        // same number of parameters so check all parameters
-        boolean flag = true;
-        for(int i = 0; i < currMethod.formals.size(); i++) {
-          if(currMethod.formals.get(i).typeid.equals(parentMethod.formals.get(i).typeid) == false) {
-            // check
-            ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Child class's method - '" + currMethod.name + "' parameter type"
-                + currMethod.formals.get(i).typeid + " is not equal to parent's parameter type '" + parentMethod.formals.get(i).typeid + "'");
-            flag = false;
+          flag = false;
+        } else {
+          // same number of parameters so check all parameters
+          for(int i = 0; i < currMethod.formals.size(); i++) {
+            if(currMethod.formals.get(i).typeid.equals(parentMethod.formals.get(i).typeid) == false) {
+              // check
+              ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Child class's method - '" + currMethod.name + "' parameter type"
+                  + currMethod.formals.get(i).typeid + " is not equal to parent's parameter type '" + parentMethod.formals.get(i).typeid + "'");
+              flag = false;
+            }
           }
         }
-        if (flag == false)
-          continue;
         // check return type
         if(currMethod.typeid.equals(parentMethod.typeid) == false) {
           // check
           ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Child class's method - '" + currMethod.name + "' return type '"
               + currMethod.typeid + "' is not equal to parent's return type '" + parentMethod.typeid + "'");
-          continue;
+          flag = false;
         }
       }
-      currNode.methods.put(currMethodName, currMethods.get(currMethodName));
+      if (flag == true)
+        currNode.methods.put(currMethodName, currMethods.get(currMethodName));
     }
     // attr
     for(String currAttrName : currAttrs.keySet()) {
@@ -142,7 +144,7 @@ public class ClassTable {
   }
 
   public boolean typeCheck(String cl1, String cl2) {
-    while(cl1 != null || cl2 != null) {
+    while(cl1 != null && cl2 != null) {
       if (cl1.equals(cl2))
         return true;
       cl1 = cnHm.get(cl1).parent;

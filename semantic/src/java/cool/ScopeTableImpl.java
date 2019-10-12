@@ -46,6 +46,12 @@ public class ScopeTableImpl {
       traverse(currClass);
       st.exitScope();
     }
+    // Check for Main and main
+    if(CT.cnHm.get("Main") == null) {
+      ErrorReporter.reportError(filename, 1, "Class 'Main' is not present");
+    } else if(CT.cnHm.get("Main").methods.containsKey("main") == false) {
+      ErrorReporter.reportError(filename, 1, " method 'main' is missing in 'Main' class");
+    }
   }
 
   void traverse(AST.class_ currClass) {
@@ -104,7 +110,7 @@ private void traverseNode(AST.expression expr) {
       AST.comp expr1 = (AST.comp)expr;
       traverseNode(expr1.e1);
       if(expr1.e1.type.equals("Int") == false) {
-            ErrorReporter.reportError(filename, expr1.lineNo, "Compliment cannot be applied on type '" + expr1.e1.type);
+            ErrorReporter.reportError(filename, expr1.lineNo, "Compliment cannot be applied on type '" + expr1.e1.type + "'");
         }
       // complement of int is still of type int.
       expr1.type = "Int";
@@ -233,8 +239,7 @@ private void traverseNode(AST.expression expr) {
       if(attr == null) {
           ErrorReporter.reportError(filename, expr1.lineNo, "Variable'" + expr1.name + "' is not declared");
       } else if(CT.typeCheck(expr1.e1.type, attr.typeid) == false) { //Evaluted expression's type
-          ErrorReporter.reportError(filename, expr1.lineNo, "The type '" + attr.typeid + "' of identifier '" + attr.name + "' does not match with the type '" + expr1.e1.type + "' of the expression.");
-          ErrorReporter.reportError(filename, expr1.lineNo, "RHS type'" + expr1.e1.type + " is not equal to declared - " + attr.name + "' type " + attr.typeid);
+          ErrorReporter.reportError(filename, expr1.lineNo, "RHS type '" + expr1.e1.type + "' is not equal to LHS - " + attr.name + "' type " + attr.typeid);
       }
       expr1.type = expr1.e1.type;
     }
@@ -257,15 +262,14 @@ private void traverseNode(AST.expression expr) {
     }
     else if(expr.getClass() == AST.cond.class) {
       AST.cond expr1 = (AST.cond)expr;
-        traverseNode(expr1.predicate);
-        traverseNode(expr1.ifbody);
-        traverseNode(expr1.elsebody);
-        if(expr1.predicate.type.equals("Bool") == false) {
-            ErrorReporter.reportError(filename, expr1.predicate.lineNo, "Predicate return type has to be of type Bool");
-        }
-        // ********
-        // The common ancestor class of ifbody expression and elsebody expression is assigned to 'cond' type
-        expr1.type = CT.commAncestor(expr1.ifbody.type, expr1.elsebody.type);
+      traverseNode(expr1.predicate);
+      traverseNode(expr1.ifbody);
+      traverseNode(expr1.elsebody);
+      if(expr1.predicate.type.equals("Bool") == false) {
+          ErrorReporter.reportError(filename, expr1.predicate.lineNo, "Predicate return type has to be of type Bool");
+      }
+      // type will be if and else body's lowest ancestor
+      expr1.type = CT.commAncestor(expr1.ifbody.type, expr1.elsebody.type);
     }
     // let ID : TYPEID [ <- expression ]
     else if(expr.getClass() == AST.let.class) {
@@ -273,7 +277,7 @@ private void traverseNode(AST.expression expr) {
       if(expr1.value.getClass() != AST.no_expr.class) {
         traverseNode(expr1.value);
         if(CT.typeCheck(expr1.value.type, expr1.typeid) == false) {
-            ErrorReporter.reportError(filename, expr1.lineNo, "'Let' declared type - '" + expr1.value.type + " is not equal to '" + expr1.name + "' type '" + expr1.typeid);
+            ErrorReporter.reportError(filename, expr1.lineNo, "'Let' declared type - '" + expr1.value.type + " is not equal to '" + expr1.name + "' type '" + expr1.typeid + "'");
         }
       }
       traverseNode(expr1.body);

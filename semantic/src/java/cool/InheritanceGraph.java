@@ -105,7 +105,7 @@ public class InheritanceGraph {
 		String parentClassName = currentClass.parent;
 		if(cannotInheritFrom.contains(parentClassName)) {
 			// some classes cannot be inherited from according to the cool specification
-			ErrorReporter.reportError(currentClass.filename, currentClass.lineNo, "Attemp to inherit from invalid class");
+			ErrorReporter.reportError(currentClass.filename, currentClass.lineNo, "Attempt to inherit from invalid class");
 			System.exit(1);
 		}
 	}
