@@ -1,8 +1,9 @@
 (*
-  Complement and negation
-  Same type checking for both sides of '<', '<=' operator
-  Checking where 'new' can be applied.
-  Undefined method
+  Complement cannot be applied on non-Int type
+  Negation cannot be applied on non-Bool type
+  LHS and RHS of '<', '<=' operator have to be equal to Int
+  'new' can be applied to declared classes only.
+  Expression type should be same as identifier's type to which assignment is being done.
   *)
 
 Class A {

@@ -1,6 +1,6 @@
 (*
-  Incorrect argument type
-  Incorrect return type
+  Incorrect argument type of child class w.r.t. Parent Class.
+  Incorrect return type of method
   *)
 
 Class A {
@@ -20,7 +20,7 @@ Class B inherits A {
 
   redeclare(x : Int, s : String) : Int { -- Child's method argument x's type is different in Parent class method.
     {
-      ret1 <- "bla";
+      ret1 <- "bla"; -- actual return is String but declared is Int, not allowed.
     }
   };
 

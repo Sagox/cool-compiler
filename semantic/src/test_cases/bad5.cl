@@ -1,5 +1,5 @@
 (*
-  Multiple class definition - class A is defined twice
+  Multiple class definition - class A is defined twice, not allowed.
   *)
 
 Class A {

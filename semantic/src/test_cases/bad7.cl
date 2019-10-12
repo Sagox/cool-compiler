@@ -1,6 +1,7 @@
 (*
-  Attribute & method redeclare
-  undeclared use
+  Attribute redeclaration not allowed
+  Method redeclaration not allowed
+  Use of undeclared variables
   *)
 
 Class A {

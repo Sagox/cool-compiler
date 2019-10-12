@@ -1,5 +1,5 @@
 (*
-  Check add, sub, div, mult
+  Check that add, sub, div, mult should have Int type operands only.
   *)
 
 class A {

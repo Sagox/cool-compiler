@@ -1,6 +1,6 @@
 (*
-  Incorrect arguments size
-  Incorrect return type
+  Incorrect arguments size of child class w.r.t. Parent Class.
+  Incorrect return type of child class w.r.t. Parent Class.
   *)
 
 Class A {
