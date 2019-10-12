@@ -105,8 +105,8 @@ public class ClassTable {
     for(String currMethodName : currMethods.keySet()) {
       boolean flag = true;
       if(currNode.methods.containsKey(currMethodName)) {
-        System.out.print("checking node method: " + currMethodName);
-        System.out.print("\n");
+        // System.out.print("checking node method: " + currMethodName);
+        // System.out.print("\n");
         AST.method currMethod = currMethods.get(currMethodName);
         AST.method parentMethod = currNode.methods.get(currMethodName);
         // number of parameters
