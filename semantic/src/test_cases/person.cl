@@ -54,7 +54,7 @@ class LazyPerson inherits Person {
 class Main inherits IO { 
   main() : Object {
   	{
-  		(new LazyPerson).init1("Sagar", "Jain", 19).printtheInfo();
+  		(new LazyPerson).init2("Sagar", "Jain", 19).printtheInfo();
   	}
   } ;
 } ;
