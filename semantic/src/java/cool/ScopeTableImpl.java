@@ -434,43 +434,48 @@ private void traverseNode(AST.expression expr) {
         }
     }
     else if(expr.getClass() == AST.typcase.class) {
-      AST.typcase curExp = (AST.typcase)expr;
-        traverseNode(curExp.predicate);
-        for(AST.branch br : curExp.branches) {
-            // We are iterating over the branches of the typcase expression
+        AST.typcase curExp = (AST.typcase)expr;
+        AST.expression curPred = curExp.predicate;
+        List<AST.branch> curBranches = curExp.branches;
+        // the predicate expression must also be traversed
+        traverseNode(curPred);
+        for(AST.branch br : curBranches) {
+            AST.expression curBranchValue = br.value;
+            // each branch is a different scope
             st.enterScope();
+            // branch type class node
             ClassNode cl = CT.cnHm.get(br.type);
-
             if(cl == null) {
-                ErrorReporter.reportError(filename, br.lineNo, "Case branch has undefined type '" + br.type + "'.");
-                ErrorStatus = true;
-                // To recover from the error, we add this unidentified class
+                ErrorReporter.reportError(filename, br.lineNo, "Case branch must have a defined type '" + br.type + "'.");
+                // Add to default class object
                 st.insert(br.name, new AST.attr(br.name, "Object", br.value, br.lineNo));
             } else {
+                // if found add to symbol table
                 st.insert(br.name, new AST.attr(br.name, br.type, br.value, br.lineNo));
             }
-
-            // Visiting the branch value expression
-            traverseNode(br.value);
+            // if the branch type is a legal class then traverse the value node as well
+            traverseNode(curBranchValue);
             st.exitScope();
         }
+        // we need to check for type clashes
+        HashMap <String, Boolean> isTypPresent = new HashMap<String, Boolean>();
 
-        HashMap <String, Boolean> brnchMap = new HashMap<String, Boolean>();
-        AST.branch brn = curExp.branches.get(0);
-        String brType = brn.value.type;
+        // initial type
+        String curBranchType = curExp.branches.get(0).value.type;
 
+        // the type of this expression is the common ancestor of all the branches
+        // if none exists if will end up being Object
         for(AST.branch br : curExp.branches) {
-            if(brnchMap.containsKey(br.type) == false) {
-                brnchMap.put(br.type, true);
+            if(isTypPresent.containsKey(br.type) == false) {
+                isTypPresent.put(br.type, true);
             } else {
+                // if no branch can be found it must result in an error, if two branches are of same type it leads
+                // to the case where no branch can be selected
                 ErrorReporter.reportError(filename, br.lineNo, "Another branch has same type '" + br.type + "'.");
-                ErrorStatus = true;
             }
-            brType = CT.commAncestor(brType, br.value.type);
+            curBranchType = CT.commAncestor(curBranchType, br.value.type);
         }
-
-        // Updating the type of typcase with last branch type
-        curExp.type = brType;
+        curExp.type = curBranchType;
     }
   }
 }
