@@ -92,302 +92,308 @@ private void traverseNode(AST.expression expr) {
       ((AST.string_const)expr).type = "String";
     // object
     else if(expr.getClass() == AST.object.class) {
-      AST.object expr1 = (AST.object)expr;
-      if(st.lookUpGlobal(expr1.name) == null) {
-          ErrorReporter.reportError(filename, expr1.lineNo, " Identifier - '" + expr1.name + "' is not declared");
+      AST.object curExp = (AST.object)expr;
+      if(st.lookUpGlobal(curExp.name) == null) {
+          ErrorReporter.reportError(filename, curExp.lineNo, " Identifier - '" + curExp.name + "' is not declared");
           // assign Object
-          expr1.type = "Object";
-      } else expr1.type = st.lookUpGlobal(expr1.name).typeid;
+          curExp.type = "Object";
+      } else curExp.type = st.lookUpGlobal(curExp.name).typeid;
     }
     // complement
     else if(expr.getClass() == AST.comp.class) {
-      AST.comp expr1 = (AST.comp)expr;
-      traverseNode(expr1.e1);
-      if(expr1.e1.type.equals("Int") == false) {
-            ErrorReporter.reportError(filename, expr1.lineNo, "Compliment cannot be applied on type '" + expr1.e1.type + "'.");
+      AST.comp curExp = (AST.comp)expr;
+      traverseNode(curExp.e1);
+      if(curExp.e1.type.equals("Int") == false) {
+            ErrorReporter.reportError(filename, curExp.lineNo, "Compliment cannot be applied on type '" + curExp.e1.type + "'.");
         }
       // complement of int is still of type int.
-      expr1.type = "Int";
+      curExp.type = "Int";
     }
     else if(expr.getClass() == AST.eq.class) {
-      AST.eq expr1 = (AST.eq)expr;
+      AST.eq curExp = (AST.eq)expr;
       // assign the types
-      traverseNode(expr1.e1);
-      traverseNode(expr1.e2);
+      traverseNode(curExp.e1);
+      traverseNode(curExp.e2);
 
-      if((expr1.e1.type.equals("Bool") || expr1.e1.type.equals("Int") || expr1.e1.type.equals("String"))) {
-        if(expr1.e1.type.equals(expr1.e2.type) == false) {
-            ErrorReporter.reportError(filename, expr1.lineNo, "The argument in equals have different types '" + expr1.e1.type + "'"+ " and '" + expr1.e2.type + "'.");
+      if((curExp.e1.type.equals("Bool") || curExp.e1.type.equals("Int") || curExp.e1.type.equals("String"))) {
+        if(curExp.e1.type.equals(curExp.e2.type) == false) {
+            ErrorReporter.reportError(filename, curExp.lineNo, "The argument in equals have different types '" + curExp.e1.type + "'"+ " and '" + curExp.e2.type + "'.");
         }
       }
       // return true or false, so boolean
-      expr1.type = "Bool";
+      curExp.type = "Bool";
     }
     else if(expr.getClass() == AST.leq.class) {
-      AST.leq expr1 = (AST.leq)expr;
+      AST.leq curExp = (AST.leq)expr;
       // assign the types
-      traverseNode(expr1.e1);
-      traverseNode(expr1.e2);
+      traverseNode(curExp.e1);
+      traverseNode(curExp.e2);
 
-      if(expr1.e1.type.equals("Int") == false ) {
-        ErrorReporter.reportError(filename, expr1.lineNo, "The argument in less-than equal to is of type non-Int '" + expr1.e1.type + "'");
-      } else if(expr1.e2.type.equals("Int") == false) {
-        ErrorReporter.reportError(filename, expr1.lineNo, "The argument in less-than equal to is of type non-Int '" + expr1.e2.type + "'");
+      if(curExp.e1.type.equals("Int") == false ) {
+        ErrorReporter.reportError(filename, curExp.lineNo, "The argument in less-than equal to is of type non-Int '" + curExp.e1.type + "'");
+      } else if(curExp.e2.type.equals("Int") == false) {
+        ErrorReporter.reportError(filename, curExp.lineNo, "The argument in less-than equal to is of type non-Int '" + curExp.e2.type + "'");
       }
       // return true or false, so boolean
-      expr1.type = "Bool";
+      curExp.type = "Bool";
     }
     else if(expr.getClass() == AST.lt.class) {
-      AST.lt expr1 = (AST.lt)expr;
-      traverseNode(expr1.e1);
-      traverseNode(expr1.e2);
+      AST.lt curExp = (AST.lt)expr;
+      traverseNode(curExp.e1);
+      traverseNode(curExp.e2);
 
-      if(expr1.e1.type.equals("Int") == false ) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in less-than is of type non-Int '" + expr1.e1.type + "'");
-      } else if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in less-than is of type non-Int '" + expr1.e2.type + "'");
+      if(curExp.e1.type.equals("Int") == false ) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument in less-than is of type non-Int '" + curExp.e1.type + "'");
+      } else if(curExp.e2.type.equals("Int") == false) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument in less-than is of type non-Int '" + curExp.e2.type + "'");
       }
       // return true or false, so boolean
-      expr1.type = "Bool";
+      curExp.type = "Bool";
     }
     else if(expr.getClass() == AST.neg.class) {
-      AST.neg expr1 = (AST.neg)expr;
+      AST.neg curExp = (AST.neg)expr;
       // assign the types
-      traverseNode(expr1.e1);
-      if(expr1.e1.type.equals("Bool") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "In the negation, argument must have type 'Bool' instead of type '" + expr1.e1.type + "'.");
+      traverseNode(curExp.e1);
+      if(curExp.e1.type.equals("Bool") == false) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "In the negation, argument must have type 'Bool' instead of type '" + curExp.e1.type + "'.");
       }
       // return negation of true or false, so boolean
-      expr1.type = "Bool";
+      curExp.type = "Bool";
     }
     else if(expr.getClass() == AST.divide.class) {
-      AST.divide expr1 = (AST.divide)expr;
+      AST.divide curExp = (AST.divide)expr;
       // assign the types
-      traverseNode(expr1.e1);
-      traverseNode(expr1.e2);
-      if(expr1.e1.type.equals("Int") == false ) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument(first) in division is of type non-Int '" + expr1.e1.type + "'");
+      traverseNode(curExp.e1);
+      traverseNode(curExp.e2);
+      if(curExp.e1.type.equals("Int") == false ) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument(first) in division is of type non-Int '" + curExp.e1.type + "'");
       }
-      if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument(second) in division is of type non-Int '" + expr1.e2.type + "'");
+      if(curExp.e2.type.equals("Int") == false) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument(second) in division is of type non-Int '" + curExp.e2.type + "'");
       }
-      expr1.type = "Int";
+      curExp.type = "Int";
     }
     else if(expr.getClass() == AST.mul.class) {
-      AST.mul expr1 = (AST.mul)expr;
+      AST.mul curExp = (AST.mul)expr;
       // assign the types
-      traverseNode(expr1.e1);
-      traverseNode(expr1.e2);
-      if(expr1.e1.type.equals("Int") == false ) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in multiplication is of type non-Int '" + expr1.e1.type + "'");
+      traverseNode(curExp.e1);
+      traverseNode(curExp.e2);
+      if(curExp.e1.type.equals("Int") == false ) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument in multiplication is of type non-Int '" + curExp.e1.type + "'");
       }
-      if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in multiplication is of type non-Int '" + expr1.e2.type + "'");
+      if(curExp.e2.type.equals("Int") == false) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument in multiplication is of type non-Int '" + curExp.e2.type + "'");
       }
-      expr1.type = "Int";
+      curExp.type = "Int";
     }
     else if(expr.getClass() == AST.sub.class) {
-      AST.sub expr1 = (AST.sub)expr;
+      AST.sub curExp = (AST.sub)expr;
       // assign the types
-      traverseNode(expr1.e1);
-      traverseNode(expr1.e2);
-      if(expr1.e1.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in subtraction is of type non-Int '" + expr1.e1.type + "'");
+      traverseNode(curExp.e1);
+      traverseNode(curExp.e2);
+      if(curExp.e1.type.equals("Int") == false) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument in subtraction is of type non-Int '" + curExp.e1.type + "'");
       }
-      if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in subtraction is of type non-Int '" + expr1.e2.type + "'");
+      if(curExp.e2.type.equals("Int") == false) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument in subtraction is of type non-Int '" + curExp.e2.type + "'");
       }
-      expr1.type = "Int";
+      curExp.type = "Int";
     }
     else if(expr.getClass() == AST.plus.class) {
-      AST.plus expr1 = (AST.plus)expr;
+      AST.plus curExp = (AST.plus)expr;
       // assign the types
-      traverseNode(expr1.e1);
-      traverseNode(expr1.e2);
-      if(expr1.e1.type.equals("Int") == false ) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in addition is of type non-Int '" + expr1.e1.type + "'");
+      traverseNode(curExp.e1);
+      traverseNode(curExp.e2);
+      if(curExp.e1.type.equals("Int") == false ) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument in addition is of type non-Int '" + curExp.e1.type + "'");
       }
-      if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in addition is of type non-Int '" + expr1.e2.type + "'");
+      if(curExp.e2.type.equals("Int") == false) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The argument in addition is of type non-Int '" + curExp.e2.type + "'");
       }
-      expr1.type = "Int";
+      curExp.type = "Int";
     }
     else if(expr.getClass() == AST.isvoid.class) {
-      AST.isvoid expr1 = (AST.isvoid)expr;
-      expr1.type = "Bool";
+      AST.isvoid curExp = (AST.isvoid)expr;
+      curExp.type = "Bool";
     }
     else if(expr.getClass() == AST.new_.class) {
-      AST.new_ expr1 = (AST.new_)expr;
+      AST.new_ curExp = (AST.new_)expr;
       // get class info
-      if(CT.cnHm.get(expr1.typeid) != null)
-        expr1.type = expr1.typeid;
+      if(CT.cnHm.get(curExp.typeid) != null)
+        curExp.type = curExp.typeid;
       else {
-        ErrorReporter.reportError(filename, expr1.lineNo, "The class '" + expr1.typeid +"' with 'new' is undefined.");
-        expr1.type = "Object";
+        ErrorReporter.reportError(filename, curExp.lineNo, "The class '" + curExp.typeid +"' with 'new' is undefined.");
+        curExp.type = "Object";
       }
     }
     else if(expr.getClass() == AST.assign.class) {
-      AST.assign expr1 = (AST.assign)expr;
-      AST.attr attr = st.lookUpGlobal(expr1.name);
-      traverseNode(expr1.e1);
+      AST.assign curExp = (AST.assign)expr;
+      AST.attr attr = st.lookUpGlobal(curExp.name);
+      traverseNode(curExp.e1);
       if(attr == null) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "Variable '" + expr1.name + "' is undeclared during assignment.");
-      } else if(CT.typeCheck(expr1.e1.type, attr.typeid) == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The type '" + attr.typeid + "' of identifier '" + attr.name + "' does not match with the type '" + expr1.e1.type + "' of the expression.");
+          ErrorReporter.reportError(filename, curExp.lineNo, "Variable '" + curExp.name + "' is undeclared during assignment.");
+      } else if(CT.typeCheck(curExp.e1.type, attr.typeid) == false) {
+          ErrorReporter.reportError(filename, curExp.lineNo, "The type '" + attr.typeid + "' of identifier '" + attr.name + "' does not match with the type '" + curExp.e1.type + "' of the expression.");
       }
-      expr1.type = expr1.e1.type;
+      curExp.type = curExp.e1.type;
     }
     else if(expr.getClass() == AST.block.class) {
-      AST.block expr1 = (AST.block)expr;
-      for(int i = 0; i < expr1.l1.size(); i++) {
-        traverseNode(expr1.l1.get(i));
+      AST.block curExp = (AST.block)expr;
+      for(int i = 0; i < curExp.l1.size(); i++) {
+        traverseNode(curExp.l1.get(i));
       }
       // get last expression's type
-      expr1.type = expr1.l1.get(expr1.l1.size() - 1).type;
+      curExp.type = curExp.l1.get(curExp.l1.size() - 1).type;
     }
     else if(expr.getClass() == AST.loop.class) {
-      AST.loop expr1 = (AST.loop)expr;
-      traverseNode(expr1.predicate);
-      if(expr1.predicate.type.equals("Bool") == false) {
-          ErrorReporter.reportError(filename, expr1.predicate.lineNo, "Loop condition's return type is not 'Bool'");
+      AST.loop curExp = (AST.loop)expr;
+      traverseNode(curExp.predicate);
+      if(curExp.predicate.type.equals("Bool") == false) {
+          ErrorReporter.reportError(filename, curExp.predicate.lineNo, "Loop condition's return type is not 'Bool'");
       }
-      traverseNode(expr1.body);
-      expr1.type = "Object";
+      traverseNode(curExp.body);
+      curExp.type = "Object";
     }
     else if(expr.getClass() == AST.cond.class) {
-      AST.cond expr1 = (AST.cond)expr;
-        traverseNode(expr1.predicate);
-        traverseNode(expr1.ifbody);
-        traverseNode(expr1.elsebody);
-        if(expr1.predicate.type.equals("Bool") == false) {
-            ErrorReporter.reportError(filename, expr1.predicate.lineNo, "Predicate return type does not match type 'Bool'");
+      AST.cond curExp = (AST.cond)expr;
+        traverseNode(curExp.predicate);
+        traverseNode(curExp.ifbody);
+        traverseNode(curExp.elsebody);
+        if(curExp.predicate.type.equals("Bool") == false) {
+            ErrorReporter.reportError(filename, curExp.predicate.lineNo, "Predicate return type does not match type 'Bool'");
         }
         // ********
         // The common ancestor class of ifbody expression and elsebody expression is assigned to 'cond' type
-        expr1.type = CT.commAncestor(expr1.ifbody.type, expr1.elsebody.type);
+        curExp.type = CT.commAncestor(curExp.ifbody.type, curExp.elsebody.type);
     }
     // let ID : TYPEID [ <- expression ]
     else if(expr.getClass() == AST.let.class) {
-      AST.let expr1 = (AST.let)expr;
-      if(expr1.value.getClass() != AST.no_expr.class) {
-        traverseNode(expr1.value);
-        if(CT.typeCheck(expr1.value.type, expr1.typeid) == false) {
-            ErrorReporter.reportError(filename, expr1.lineNo, "The identifier " + expr1.name + " declared type '" + expr1.typeid + "' does not match with let value type '" + expr1.value.type + ".");
+      AST.let curExp = (AST.let)expr;
+      if(curExp.value.getClass() != AST.no_expr.class) {
+        traverseNode(curExp.value);
+        if(CT.typeCheck(curExp.value.type, curExp.typeid) == false) {
+            ErrorReporter.reportError(filename, curExp.lineNo, "The identifier " + curExp.name + " declared type '" + curExp.typeid + "' does not match with let value type '" + curExp.value.type + ".");
         }
       }
-      traverseNode(expr1.body);
+      traverseNode(curExp.body);
       st.enterScope();
-      st.insert(expr1.name, new AST.attr(expr1.name, expr1.typeid, expr1.value, expr1.lineNo));
-      expr1.type = expr1.body.type;
+      st.insert(curExp.name, new AST.attr(curExp.name, curExp.typeid, curExp.value, curExp.lineNo));
+      curExp.type = curExp.body.type;
       st.exitScope();
     }
+    // handling the types of method calls
+
+    // type #1
     // <expr>.<id>(<expr>,....)
     else if(expr.getClass() == AST.dispatch.class) {
-      AST.dispatch expr1 = (AST.dispatch)expr;
-        AST.method mthd = null;
-        boolean found = false;
+        AST.dispatch curExp= (AST.dispatch)expr;
+        // assume method does not exist
+        boolean methodExists = false;
 
-        // Calling the visit node on caller expression
-        traverseNode(expr1.caller);
+        // Checking the validity of the caller
+        traverseNode(curExp.caller);
 
-        for(AST.expression exp : expr1.actuals) {
-            // actuals is the list of expressions
+        // Checking the validity of the arguments, i.e. expression list
+        for(AST.expression exp : curExp.actuals) {
             traverseNode(exp);
         }
-
-        // Returns the type class basic block for caller expression of dispatch
-        ClassNode bcb = CT.cnHm.get(expr1.caller.type);
-        if(bcb == null) {
-            // Means no type is returned
-            ErrorReporter.reportError(filename, expr1.lineNo, "Undefined class '" + expr1.caller.type + "' of dispatch caller type.");
+        // get the classNode of the caller from the calssNode hashmap
+        ClassNode callerClass = CT.cnHm.get(curExp.caller.type);
+        if(callerClass == null) {
+            // if does not exist then report error
+            ErrorReporter.reportError(filename, curExp.lineNo, "The class '" + curExp.caller.type + "' is undefined in this context.");
         } else {
-            if(bcb.methods.containsKey(expr1.name)) {
-                // Means the dispatch method is present in the method list of basic class block
-                found = true;
-                mthd = bcb.methods.get(expr1.name);
-
-                // Now we will compare the method formal list and number of parameters to the dispatch method
-                if(expr1.actuals.size() != mthd.formals.size()) {
-                    // Different number of parameters in the called dispatch
-                    ErrorReporter.reportError(filename, expr1.lineNo, "Different number of arguments present in the method '" + mthd.name + "' as compared to the defined method.");
+            // check if the method is actually present in the class
+            if(callerClass.methods.containsKey(curExp.name)) {
+                methodExists = true;
+                // check if required number of arguments and given number of arguments are same                
+                if(curExp.actuals.size() != callerClass.methods.get(curExp.name).formals.size()) {
+                    // If the number of arguments is different then report error
+                    ErrorReporter.reportError(filename, curExp.lineNo, "Number of arguments in method("+ curExp.actuals.size() +") '" + callerClass.methods.get(curExp.name).name + "' not same as expected"+ callerClass.methods.get(curExp.name).formals.size() +"from defined method.");
                 } else {
-                    // The number of parameters match but the type of individual parameter may not be same as defined
-                    for(int i=0; i<expr1.actuals.size(); i++) {
-                        if(CT.typeCheck(expr1.actuals.get(i).type, mthd.formals.get(i).typeid) == false) {
-                            // Means the type does not match
-                            ErrorReporter.reportError(filename, expr1.lineNo, "The method type '" + expr1.actuals.get(i).type + "' does not match with the declared type '" + mthd.formals.get(i).typeid + "' in the method '" + mthd.name + "'.");
+                    // If number of arguments provided is same then we must check for the types of these arguments
+                    for(int i=0; i<curExp.actuals.size(); i++) {
+                        if(CT.typeCheck(curExp.actuals.get(i).type, callerClass.methods.get(curExp.name).formals.get(i).typeid) == false) {
+                            // if the types do not match report error
+                          AST.method temp = callerClass.methods.get(curExp.name);
+                            ErrorReporter.reportError(filename, curExp.lineNo, "Given('" + curExp.actuals.get(i).type + "') method type differs from expected type('" + temp.formals.get(i).typeid + "') in '" + temp.name + "'.");
                         }
                     }
                 }
             } else {
-                // Means the method is not defined in any class
-                ErrorReporter.reportError(filename, expr1.lineNo, "Method '" + expr1.name + "' is undefined.");
+                // Means the method does not belong to the class
+                ErrorReporter.reportError(filename, curExp.lineNo, "Method '" + curExp.name + "' is not present in class " + curExp.caller.type + ".");
             }
         }
 
-        if(found) {
-            expr1.type = mthd.typeid;
+        if(methodExists) {
+            curExp.type = callerClass.methods.get(curExp.name).typeid;
         } else {
-            expr1.type = "Object";
+          // this sets the type to default Object, this may lead to some confusing error messages since
+          // an arbitrary expression may be assumed to be of class object if containing any error
+            curExp.type = "Object";
         }
     }
+    // type #2 of method calls
     // * <expr>@<type>.<id> (<expr>,....)
     else if(expr.getClass() == AST.static_dispatch.class) {
-      AST.static_dispatch expr1 = (AST.static_dispatch)expr;
-        AST.method mthd = null;
-        boolean found = false;
+      AST.static_dispatch curExp = (AST.static_dispatch)expr;
+        boolean methodExists = false;
 
-        // Calling the visit node on caller expression
-        traverseNode(expr1.caller);
+        // Checking the validity of the caller
+        traverseNode(curExp.caller);
 
-        for(AST.expression exp : expr1.actuals) {
-            // actuals is the list of expressions
+        // get the classNode of the caller from the calssNode hashmap
+        ClassNode callerClass = CT.cnHm.get(curExp.typeid);
+
+        for(AST.expression exp : curExp.actuals) {
+            // Checking the validity of the arguments, i.e. expression list
             traverseNode(exp);
         }
 
-        // Returns the type class basic block for caller expression of dispatch
-        ClassNode bcb = CT.cnHm.get(expr1.typeid);
-        if(bcb == null) {
-            // Means no type is returned
-            ErrorReporter.reportError(filename, expr1.lineNo, "Undefined class '" + expr1.typeid + "' of Static dispatch type.");
-        } else if(CT.typeCheck(expr1.caller.type, bcb.name) == false) {
-            // Means the static dispatch type doesn't match to the expression type
-            ErrorReporter.reportError(filename, expr1.lineNo, "The declared static dispatch type '" + bcb.name + "' is different from the expression type '" + expr1.caller.type + "'.");
+        if(callerClass == null) {
+            // no class returned
+            ErrorReporter.reportError(filename, curExp.lineNo, "The class '" + curExp.typeid + "' is undefined in the context of this dispatch.");
+        } else if(CT.typeCheck(curExp.caller.type, callerClass.name) == false) {
+            // the name of the class does not match the type of the dispatch expression
+            ErrorReporter.reportError(filename, curExp.lineNo, "The expected class of the method in the static dispatch is '" + callerClass.name + "' which is different from the expression type '" + curExp.caller.type + "'.");
         } else {
-            if(bcb.methods.containsKey(expr1.name)) {
-                // Means the static dispatch method is present in the method list of basic class block
-                found = true;
-                mthd = bcb.methods.get(expr1.name);
+            if(callerClass.methods.containsKey(curExp.name)) {
+                // the method called is present in the class mentioned in the static dispatch
+                methodExists = true;
 
-                // Now we will compare the method formal list and number of parameters to the static dispatch method
-                if(expr1.actuals.size() != mthd.formals.size()) {
+                // Comparing the required number of arguments to the given number of arguments
+                if(curExp.actuals.size() != callerClass.methods.get(curExp.name).formals.size()) {
                     // Different number of parameters in the called static dispatch
-                    ErrorReporter.reportError(filename, expr1.lineNo, "Different number of arguments present in the method '" + mthd.name + "' as compared to the defined method.");
+                    ErrorReporter.reportError(filename, curExp.lineNo, "Number of arguments in method("+ curExp.actuals.size() +") '" + callerClass.methods.get(curExp.name).name + "' not same as expected"+ callerClass.methods.get(curExp.name).formals.size() +"from defined method.");
                 } else {
-                    // The number of parameters match but the type of individual parameter may not be same as defined
-                    for(int i=0; i<expr1.actuals.size(); i++) {
-                        if(CT.typeCheck(expr1.actuals.get(i).type, mthd.formals.get(i).typeid) == false) {
+                    // If the number of arguments match, we must check if the arguments are of the same type
+                    for(int i=0; i<curExp.actuals.size(); i++) {
+                        if(CT.typeCheck(curExp.actuals.get(i).type, callerClass.methods.get(curExp.name).formals.get(i).typeid) == false) {
                             // Means the type does not match
-                            ErrorReporter.reportError(filename, expr1.lineNo, "The method type '" + expr1.actuals.get(i).type + "' does not match with the declared type '" + mthd.formals.get(i).typeid + "' in the method '" + mthd.name + "'.");
+                            AST.method temp = callerClass.methods.get(curExp.name);
+                            ErrorReporter.reportError(filename, curExp.lineNo, "Given('" + curExp.actuals.get(i).type + "') method type differs from expected type('" + temp.formals.get(i).typeid + "') in '" + temp.name + "'.");
                         }
                     }
                 }
             } else {
                 // Means the method is not defined in any class
-                ErrorReporter.reportError(filename, expr1.lineNo, "Method '" + expr1.name + "' is undefined.");
+                ErrorReporter.reportError(filename, curExp.lineNo, "Method '" + curExp.name + "' is not present in the class" + callerClass.name+ ".");
             }
         }
 
-        if(found) {
-            expr1.type = mthd.typeid;
+        if(methodExists) {
+            curExp.type = callerClass.methods.get(curExp.name).typeid;
         } else {
-            expr1.type = "Object";
+          // this sets the type to default Object, this may lead to some confusing error messages since
+          // an arbitrary expression may be assumed to be of class object if containing any error
+            curExp.type = "Object";
         }
     }
     else if(expr.getClass() == AST.typcase.class) {
-      AST.typcase expr1 = (AST.typcase)expr;
-        traverseNode(expr1.predicate);
-        for(AST.branch br : expr1.branches) {
+      AST.typcase curExp = (AST.typcase)expr;
+        traverseNode(curExp.predicate);
+        for(AST.branch br : curExp.branches) {
             // We are iterating over the branches of the typcase expression
             st.enterScope();
             ClassNode cl = CT.cnHm.get(br.type);
@@ -406,10 +412,10 @@ private void traverseNode(AST.expression expr) {
         }
 
         HashMap <String, Boolean> brnchMap = new HashMap<String, Boolean>();
-        AST.branch brn = expr1.branches.get(0);
+        AST.branch brn = curExp.branches.get(0);
         String brType = brn.value.type;
 
-        for(AST.branch br : expr1.branches) {
+        for(AST.branch br : curExp.branches) {
             if(brnchMap.containsKey(br.type) == false) {
                 brnchMap.put(br.type, true);
             } else {
@@ -419,7 +425,7 @@ private void traverseNode(AST.expression expr) {
         }
 
         // Updating the type of typcase with last branch type
-        expr1.type = brType;
+        curExp.type = brType;
     }
   }
 }
