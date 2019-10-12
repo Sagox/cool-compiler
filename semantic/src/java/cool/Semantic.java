@@ -30,7 +30,9 @@ public class Semantic{
 			System.exit(1);
 		}
 
+		// Generate class table which is responsible for storing all the classes and its attributes, methods.
 		ClassTable CT = new ClassTable(program);
+		// Generate scope table using class Table and assign types wherever necessary.
 		ScopeTableImpl ST = new ScopeTableImpl(program, IG, CT);
 
 	}

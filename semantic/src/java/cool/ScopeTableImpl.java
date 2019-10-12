@@ -3,21 +3,8 @@ package cool;
 import java.util.*;
 
 public class ScopeTableImpl {
-  // // number of nodes in the inheritance graph i.e. number of classes in
-  // // the given program
-  // int numberOfNodes;
-  // // a map to store the index at which a given class is found in the program
-  // // ast given to us
-  // HashMap<String, Integer> classIDs;
-
-  // // the representation of the inhertiance graph in terms of an adjacency list
-  // LinkedList<Integer> adjacencyList[];
-
-  // ArrayList<String> basicClasses = new ArrayList<String>();
-  // ArrayList<String> cannotInheritFrom = new ArrayList<String>();
 
   public ScopeTable<AST.attr> st = new ScopeTable<AST.attr>();
-  public List<Error> errors = new ArrayList<Error>();
   public ClassTable CT;
   public String filename;
 
@@ -31,8 +18,8 @@ public class ScopeTableImpl {
     q.offer(numberOfNodes + 1);
     while (!q.isEmpty()) {
       int classID = q.poll();
-      System.out.print("checking node bfs: " + IG.iDName.get(classID));
-        System.out.print("\n");
+      // System.out.print("checking node bfs: " + IG.iDName.get(classID));
+      //   System.out.print("\n");
       if(classID != numberOfNodes && classID != numberOfNodes + 1) {
         // insert classes in BFS-order so that methods and attributes can be inherited.
         // System.out.print("checking node bfs: " + IG.iDName.get(classID));
@@ -50,8 +37,8 @@ public class ScopeTableImpl {
       // insert self
       st.insert("self", new AST.attr("self", currClass.name, new AST.no_expr(currClass.lineNo), currClass.lineNo));
       // now insert all declared and inherited
-      System.out.print(i + " : ST attr : " + currClass.name + CT.cnHm);
-      System.out.print("\n");
+      // System.out.print(i + " : ST attr : " + currClass.name + CT.cnHm);
+      // System.out.print("\n");
       HashMap<String, AST.attr> attributes = CT.cnHm.get(currClass.name).attrs;
       for(String attrName : attributes.keySet()) {
         st.insert(attrName, attributes.get(attrName));
@@ -69,29 +56,26 @@ public class ScopeTableImpl {
         for(int j = 0; j < currMethod.formals.size(); j++) {
           if(st.lookUpLocal(currMethod.formals.get(j).name) != null && st.lookUpLocal(currMethod.formals.get(j).name).getClass() == AST.attr.class) {
             ErrorReporter.reportError(currClass.filename,
-              currMethod.lineNo,"Method's parameter - " + currMethod.name + " is redefined.");
+              currMethod.lineNo,"Method's parameter - '" + ((AST.attr)st.lookUpLocal(currMethod.formals.get(j).name)).name + "' is redefined");
           }
           st.insert(currMethod.formals.get(j).name, new AST.attr(currMethod.formals.get(j).name,
             currMethod.formals.get(j).typeid, new AST.no_expr(currMethod.formals.get(j).lineNo),
             currMethod.formals.get(j).lineNo));
         }
         traverseNode(currMethod.body);
-        if(CT.isConforming(currMethod.body.type, currMethod.typeid) == false) {
+        if(CT.typeCheck(currMethod.body.type, currMethod.typeid) == false) {
           ErrorReporter.reportError(currClass.filename,currMethod.body.lineNo,
-            "Declared Return type - " + currMethod.typeid + " is not equal to " + currMethod.body.type);
+            "Method return type - '" + currMethod.typeid + "' is not equal to actual type '" + currMethod.body.type + "'");
         }
         st.exitScope();
       }
       else if(currClass.features.get(i).getClass() == AST.attr.class){
-        // If attr's value is an expression class
-        // undeclared??
         AST.attr currAttr = (AST.attr) currClass.features.get(i);
         if(currAttr.value.getClass() != AST.no_expr.class) {
             traverseNode(currAttr.value);
-            // conform??
-            if(CT.isConforming(currAttr.value.type, currAttr.typeid) == false) {
-              ErrorReporter.reportError(filename, currAttr.value.lineNo, "Inferred type " + currAttr.value.type + " of initialization of attribute "
-                  + currAttr.name + " does not conform to declared type " + currAttr.typeid);
+            if(CT.typeCheck(currAttr.value.type, currAttr.typeid) == false) {
+              ErrorReporter.reportError(filename, currAttr.value.lineNo, "Decalred Type - '" + currAttr.typeid + "' of '"
+                  + currAttr.name + "' is not equal to actual type '" + currAttr.value.type + "'");
             }
         }
       }
@@ -99,36 +83,6 @@ public class ScopeTableImpl {
   }
 
 private void traverseNode(AST.expression expr) {
-    /* traverseNode functions given in the following order
-     * program = class_list
-     * class =
-     * feature = method / attribute
-     * ID <- expr [ASSIGN]
-     * <expr>.<id>(<expr>,....) [DISPATCH]
-     * <expr>@<type>.<id> (<expr>,....) [STATIC DISPATCH]
-     * if <expr> then <expr> else <expr> fi [COND]
-     * while <expr> loop <expr> pool [WHILE]
-     * { <expr>, <expr>, ... }  [BLOCK]
-     * let ID : TYPE <- expr  [LET-EXPR]
-     * case <expr> of ID : TYPE => expr esac [CASE]
-     * new TYPE [NEW]
-     * isvoid <expr> [ISVOID]
-     * expr + expr  [PLUS]
-     * expr - expr  [SUB]
-     * expr * expr  [MUL]
-     * expr / expr  [DIVIDE]
-     * ~expr    [COMP]
-     * expr < expr  [LT]
-     * expr <= expr [LEQ]
-     * expr = expr  [EQ]
-     * not expr   [NEG]
-     * (expr)
-     * ID     [
-     * integer    [INT_CONST]
-     * string   [STRING_CONST]
-     * true     [BOOL_CONST]
-     * false    [BOOL_CONST]
-     */
     // constants - Bool, Int, String
     if(expr.getClass() == AST.bool_const.class)
       ((AST.bool_const)expr).type = "Bool";
@@ -140,7 +94,7 @@ private void traverseNode(AST.expression expr) {
     else if(expr.getClass() == AST.object.class) {
       AST.object expr1 = (AST.object)expr;
       if(st.lookUpGlobal(expr1.name) == null) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "Undeclared Indentifier - '" + expr1.name);
+          ErrorReporter.reportError(filename, expr1.lineNo, " Identifier - '" + expr1.name + "' is not declared");
           // assign Object
           expr1.type = "Object";
       } else expr1.type = st.lookUpGlobal(expr1.name).typeid;
@@ -150,7 +104,7 @@ private void traverseNode(AST.expression expr) {
       AST.comp expr1 = (AST.comp)expr;
       traverseNode(expr1.e1);
       if(expr1.e1.type.equals("Int") == false) {
-            ErrorReporter.reportError(filename, expr1.lineNo, "In the compliment, argument must have type Int instead of type '" + expr1.e1.type + "'.");
+            ErrorReporter.reportError(filename, expr1.lineNo, "Compliment cannot be applied on type '" + expr1.e1.type + "'.");
         }
       // complement of int is still of type int.
       expr1.type = "Int";
@@ -278,7 +232,7 @@ private void traverseNode(AST.expression expr) {
       traverseNode(expr1.e1);
       if(attr == null) {
           ErrorReporter.reportError(filename, expr1.lineNo, "Variable '" + expr1.name + "' is undeclared during assignment.");
-      } else if(CT.isConforming(expr1.e1.type, attr.typeid) == false) {
+      } else if(CT.typeCheck(expr1.e1.type, attr.typeid) == false) {
           ErrorReporter.reportError(filename, expr1.lineNo, "The type '" + attr.typeid + "' of identifier '" + attr.name + "' does not match with the type '" + expr1.e1.type + "' of the expression.");
       }
       expr1.type = expr1.e1.type;
@@ -310,14 +264,14 @@ private void traverseNode(AST.expression expr) {
         }
         // ********
         // The common ancestor class of ifbody expression and elsebody expression is assigned to 'cond' type
-        expr1.type = CT.commonAncestor(expr1.ifbody.type, expr1.elsebody.type);
+        expr1.type = CT.commAncestor(expr1.ifbody.type, expr1.elsebody.type);
     }
     // let ID : TYPEID [ <- expression ]
     else if(expr.getClass() == AST.let.class) {
       AST.let expr1 = (AST.let)expr;
       if(expr1.value.getClass() != AST.no_expr.class) {
         traverseNode(expr1.value);
-        if(CT.isConforming(expr1.value.type, expr1.typeid) == false) {
+        if(CT.typeCheck(expr1.value.type, expr1.typeid) == false) {
             ErrorReporter.reportError(filename, expr1.lineNo, "The identifier " + expr1.name + " declared type '" + expr1.typeid + "' does not match with let value type '" + expr1.value.type + ".");
         }
       }
@@ -359,7 +313,7 @@ private void traverseNode(AST.expression expr) {
                 } else {
                     // The number of parameters match but the type of individual parameter may not be same as defined
                     for(int i=0; i<expr1.actuals.size(); i++) {
-                        if(CT.isConforming(expr1.actuals.get(i).type, mthd.formals.get(i).typeid) == false) {
+                        if(CT.typeCheck(expr1.actuals.get(i).type, mthd.formals.get(i).typeid) == false) {
                             // Means the type does not match
                             ErrorReporter.reportError(filename, expr1.lineNo, "The method type '" + expr1.actuals.get(i).type + "' does not match with the declared type '" + mthd.formals.get(i).typeid + "' in the method '" + mthd.name + "'.");
                         }
@@ -396,7 +350,7 @@ private void traverseNode(AST.expression expr) {
         if(bcb == null) {
             // Means no type is returned
             ErrorReporter.reportError(filename, expr1.lineNo, "Undefined class '" + expr1.typeid + "' of Static dispatch type.");
-        } else if(CT.isConforming(expr1.caller.type, bcb.name) == false) {
+        } else if(CT.typeCheck(expr1.caller.type, bcb.name) == false) {
             // Means the static dispatch type doesn't match to the expression type
             ErrorReporter.reportError(filename, expr1.lineNo, "The declared static dispatch type '" + bcb.name + "' is different from the expression type '" + expr1.caller.type + "'.");
         } else {
@@ -412,7 +366,7 @@ private void traverseNode(AST.expression expr) {
                 } else {
                     // The number of parameters match but the type of individual parameter may not be same as defined
                     for(int i=0; i<expr1.actuals.size(); i++) {
-                        if(CT.isConforming(expr1.actuals.get(i).type, mthd.formals.get(i).typeid) == false) {
+                        if(CT.typeCheck(expr1.actuals.get(i).type, mthd.formals.get(i).typeid) == false) {
                             // Means the type does not match
                             ErrorReporter.reportError(filename, expr1.lineNo, "The method type '" + expr1.actuals.get(i).type + "' does not match with the declared type '" + mthd.formals.get(i).typeid + "' in the method '" + mthd.name + "'.");
                         }
@@ -461,7 +415,7 @@ private void traverseNode(AST.expression expr) {
             } else {
                 ErrorReporter.reportError(filename, br.lineNo, "Another branch has same type '" + br.type + "'.");
             }
-            brType = CT.commonAncestor(brType, br.value.type);
+            brType = CT.commAncestor(brType, br.value.type);
         }
 
         // Updating the type of typcase with last branch type
