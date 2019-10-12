@@ -74,7 +74,7 @@ public class ScopeTableImpl {
         if(currAttr.value.getClass() != AST.no_expr.class) {
             traverseNode(currAttr.value);
             if(CT.typeCheck(currAttr.value.type, currAttr.typeid) == false) {
-              ErrorReporter.reportError(filename, currAttr.value.lineNo, "Decalred Type - '" + currAttr.typeid + "' of '"
+              ErrorReporter.reportError(filename, currAttr.value.lineNo, "Declared Type - '" + currAttr.typeid + "' of '"
                   + currAttr.name + "' is not equal to actual type '" + currAttr.value.type + "'");
             }
         }
@@ -104,7 +104,7 @@ private void traverseNode(AST.expression expr) {
       AST.comp expr1 = (AST.comp)expr;
       traverseNode(expr1.e1);
       if(expr1.e1.type.equals("Int") == false) {
-            ErrorReporter.reportError(filename, expr1.lineNo, "Compliment cannot be applied on type '" + expr1.e1.type + "'.");
+            ErrorReporter.reportError(filename, expr1.lineNo, "Compliment cannot be applied on type '" + expr1.e1.type);
         }
       // complement of int is still of type int.
       expr1.type = "Int";
@@ -117,7 +117,7 @@ private void traverseNode(AST.expression expr) {
 
       if((expr1.e1.type.equals("Bool") || expr1.e1.type.equals("Int") || expr1.e1.type.equals("String"))) {
         if(expr1.e1.type.equals(expr1.e2.type) == false) {
-            ErrorReporter.reportError(filename, expr1.lineNo, "The argument in equals have different types '" + expr1.e1.type + "'"+ " and '" + expr1.e2.type + "'.");
+            ErrorReporter.reportError(filename, expr1.lineNo, "LHS type - '" + expr1.e1.type + "' is not equal to RHS type - '" + expr1.e2.type + "'");
         }
       }
       // return true or false, so boolean
@@ -130,9 +130,9 @@ private void traverseNode(AST.expression expr) {
       traverseNode(expr1.e2);
 
       if(expr1.e1.type.equals("Int") == false ) {
-        ErrorReporter.reportError(filename, expr1.lineNo, "The argument in less-than equal to is of type non-Int '" + expr1.e1.type + "'");
+        ErrorReporter.reportError(filename, expr1.lineNo, "LHS type '" + expr1.e1.type + "' is not equal to Int");
       } else if(expr1.e2.type.equals("Int") == false) {
-        ErrorReporter.reportError(filename, expr1.lineNo, "The argument in less-than equal to is of type non-Int '" + expr1.e2.type + "'");
+        ErrorReporter.reportError(filename, expr1.lineNo, "RHS type '" + expr1.e2.type + "' is not equal to Int");
       }
       // return true or false, so boolean
       expr1.type = "Bool";
@@ -143,9 +143,9 @@ private void traverseNode(AST.expression expr) {
       traverseNode(expr1.e2);
 
       if(expr1.e1.type.equals("Int") == false ) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in less-than is of type non-Int '" + expr1.e1.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "LHS type '" + expr1.e1.type + "' is not equal to Int");
       } else if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in less-than is of type non-Int '" + expr1.e2.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "RHS type '" + expr1.e2.type + "' is not equal to Int");
       }
       // return true or false, so boolean
       expr1.type = "Bool";
@@ -155,7 +155,7 @@ private void traverseNode(AST.expression expr) {
       // assign the types
       traverseNode(expr1.e1);
       if(expr1.e1.type.equals("Bool") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "In the negation, argument must have type 'Bool' instead of type '" + expr1.e1.type + "'.");
+          ErrorReporter.reportError(filename, expr1.lineNo, "Negation cannot be applied on type '" + expr1.e1.type + "'");
       }
       // return negation of true or false, so boolean
       expr1.type = "Bool";
@@ -166,10 +166,10 @@ private void traverseNode(AST.expression expr) {
       traverseNode(expr1.e1);
       traverseNode(expr1.e2);
       if(expr1.e1.type.equals("Int") == false ) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument(first) in division is of type non-Int '" + expr1.e1.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "Numerator has to be of type Int and not '" + expr1.e1.type + "'");
       }
       if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument(second) in division is of type non-Int '" + expr1.e2.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "Denominator has to be of type Int and not '" + expr1.e2.type + "'");
       }
       expr1.type = "Int";
     }
@@ -179,10 +179,10 @@ private void traverseNode(AST.expression expr) {
       traverseNode(expr1.e1);
       traverseNode(expr1.e2);
       if(expr1.e1.type.equals("Int") == false ) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in multiplication is of type non-Int '" + expr1.e1.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "First Operand has to be of type Int and not '" + expr1.e1.type + "'");
       }
       if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in multiplication is of type non-Int '" + expr1.e2.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "Second Operand has to be of type Int and not '" + expr1.e2.type + "'");
       }
       expr1.type = "Int";
     }
@@ -192,10 +192,10 @@ private void traverseNode(AST.expression expr) {
       traverseNode(expr1.e1);
       traverseNode(expr1.e2);
       if(expr1.e1.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in subtraction is of type non-Int '" + expr1.e1.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "First Operand has to be of type Int and not '" + expr1.e1.type + "'");
       }
       if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in subtraction is of type non-Int '" + expr1.e2.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "Second Operand has to be of type Int and not '" + expr1.e2.type + "'");
       }
       expr1.type = "Int";
     }
@@ -205,10 +205,10 @@ private void traverseNode(AST.expression expr) {
       traverseNode(expr1.e1);
       traverseNode(expr1.e2);
       if(expr1.e1.type.equals("Int") == false ) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in addition is of type non-Int '" + expr1.e1.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "First Operand has to be of type Int and not '" + expr1.e1.type + "'");
       }
       if(expr1.e2.type.equals("Int") == false) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "The argument in addition is of type non-Int '" + expr1.e2.type + "'");
+          ErrorReporter.reportError(filename, expr1.lineNo, "Second Operand has to be of type Int and not '" + expr1.e2.type + "'");
       }
       expr1.type = "Int";
     }
@@ -222,7 +222,7 @@ private void traverseNode(AST.expression expr) {
       if(CT.cnHm.get(expr1.typeid) != null)
         expr1.type = expr1.typeid;
       else {
-        ErrorReporter.reportError(filename, expr1.lineNo, "The class '" + expr1.typeid +"' with 'new' is undefined.");
+        ErrorReporter.reportError(filename, expr1.lineNo, "Cannot call 'new' on type '" + expr1.typeid +"'");
         expr1.type = "Object";
       }
     }
@@ -231,9 +231,10 @@ private void traverseNode(AST.expression expr) {
       AST.attr attr = st.lookUpGlobal(expr1.name);
       traverseNode(expr1.e1);
       if(attr == null) {
-          ErrorReporter.reportError(filename, expr1.lineNo, "Variable '" + expr1.name + "' is undeclared during assignment.");
-      } else if(CT.typeCheck(expr1.e1.type, attr.typeid) == false) {
+          ErrorReporter.reportError(filename, expr1.lineNo, "Variable'" + expr1.name + "' is not declared");
+      } else if(CT.typeCheck(expr1.e1.type, attr.typeid) == false) { //Evaluted expression's type
           ErrorReporter.reportError(filename, expr1.lineNo, "The type '" + attr.typeid + "' of identifier '" + attr.name + "' does not match with the type '" + expr1.e1.type + "' of the expression.");
+          ErrorReporter.reportError(filename, expr1.lineNo, "RHS type'" + expr1.e1.type + " is not equal to declared - " + attr.name + "' type " + attr.typeid);
       }
       expr1.type = expr1.e1.type;
     }
@@ -249,7 +250,7 @@ private void traverseNode(AST.expression expr) {
       AST.loop expr1 = (AST.loop)expr;
       traverseNode(expr1.predicate);
       if(expr1.predicate.type.equals("Bool") == false) {
-          ErrorReporter.reportError(filename, expr1.predicate.lineNo, "Loop condition's return type is not 'Bool'");
+          ErrorReporter.reportError(filename, expr1.predicate.lineNo, "Loop Condition has to evalute to a Bool");
       }
       traverseNode(expr1.body);
       expr1.type = "Object";
@@ -260,7 +261,7 @@ private void traverseNode(AST.expression expr) {
         traverseNode(expr1.ifbody);
         traverseNode(expr1.elsebody);
         if(expr1.predicate.type.equals("Bool") == false) {
-            ErrorReporter.reportError(filename, expr1.predicate.lineNo, "Predicate return type does not match type 'Bool'");
+            ErrorReporter.reportError(filename, expr1.predicate.lineNo, "Predicate return type has to be of type Bool");
         }
         // ********
         // The common ancestor class of ifbody expression and elsebody expression is assigned to 'cond' type
@@ -272,14 +273,14 @@ private void traverseNode(AST.expression expr) {
       if(expr1.value.getClass() != AST.no_expr.class) {
         traverseNode(expr1.value);
         if(CT.typeCheck(expr1.value.type, expr1.typeid) == false) {
-            ErrorReporter.reportError(filename, expr1.lineNo, "The identifier " + expr1.name + " declared type '" + expr1.typeid + "' does not match with let value type '" + expr1.value.type + ".");
+            ErrorReporter.reportError(filename, expr1.lineNo, "'Let' declared type - '" + expr1.value.type + " is not equal to '" + expr1.name + "' type '" + expr1.typeid);
         }
       }
       traverseNode(expr1.body);
       st.enterScope();
       st.insert(expr1.name, new AST.attr(expr1.name, expr1.typeid, expr1.value, expr1.lineNo));
-      expr1.type = expr1.body.type;
       st.exitScope();
+      expr1.type = expr1.body.type;
     }
     // <expr>.<id>(<expr>,....)
     else if(expr.getClass() == AST.dispatch.class) {

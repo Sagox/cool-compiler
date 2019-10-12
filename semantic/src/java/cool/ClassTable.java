@@ -112,7 +112,7 @@ public class ClassTable {
         for(int i = 0; i < currMethod.formals.size(); i++) {
           if(currMethod.formals.get(i).typeid.equals(parentMethod.formals.get(i).typeid) == false) {
             // check
-            ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Child class's method - '" + currMethod.name + "'' parameter type"
+            ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Child class's method - '" + currMethod.name + "' parameter type"
                 + currMethod.formals.get(i).typeid + " is not equal to parent's parameter type '" + parentMethod.formals.get(i).typeid + "'");
             flag = false;
           }
