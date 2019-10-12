@@ -302,8 +302,8 @@ private void traverseNode(AST.expression expr) {
       AST.let curExp = (AST.let)expr;
       if(curExp.value.getClass() != AST.no_expr.class) {
         traverseNode(curExp.value);
-        System.out.print("checking let: " + curExp.typeid);
-        System.out.print("\n");
+        // System.out.print("charecking let: " + curExp.typeid);
+        // System.out.print("\n");
         if(CT.typeCheck(curExp.value.type, curExp.typeid) == false) {
           ErrorReporter.reportError(filename, curExp.lineNo, "'Let' declared type - '" + curExp.value.type + " is not equal to '" + curExp.name + "' type '" + curExp.typeid);
           ErrorStatus = true;
