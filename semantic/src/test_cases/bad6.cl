@@ -1,9 +1,7 @@
 (*
-  We cannot Inherit from Bool, Int and String
+  Inheriting from Bool, Int, String is not allowed
 *)
-(*
-  Inherit Bool
-  *)
+
 Class A inherits Bool {
   x : Int;
 };

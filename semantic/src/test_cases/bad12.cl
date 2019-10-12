@@ -1,7 +1,6 @@
 (*
-  let
-  conditional
-  block
+  let typeid must be equal to its value's type
+  Predicates in loop/if must evaluate to a Bool
   *)
 
 Class A {
@@ -10,7 +9,7 @@ Class A {
   ret: Int;
 
   redeclare(x: String, y: Int) : Int {
-    let cur_x : String <- y in -- let's value if of type String but is being assigned an Int, which should not happen.
+    let cur_x : String <- y in -- let has typeid String but is being assigned an Int, which is not legal.
     {
       if y <- 18 then a <- 5 else 0 fi; -- Here predicate return is not Bool, so report.
       while (cur_x) loop -- Loop predicate must be of type Bool.
