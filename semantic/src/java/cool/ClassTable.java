@@ -156,8 +156,7 @@ public class ClassTable {
     if (classScope.get(cl1) < classScope.get(cl2)) {
       return commAncestor(cl1, cnHm.get(cl2).parent);
     } else {
-      commAncestor(cnHm.get(cl1).parent, cl2);
+      return commAncestor(cnHm.get(cl1).parent, cl2);
     }
-    return "";
   }
 }
