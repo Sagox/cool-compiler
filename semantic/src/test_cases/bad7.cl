@@ -5,12 +5,12 @@
 
 Class A {
   a : Int;
-  a : String;
+  a : String; -- attribute a is declared twice, so error.
   ret: Int;
 
-  redeclare() : Int {
+  redeclare() : Int { -- this method is declared twice
     {
-      ret1 <- 1;
+      ret1 <- 1; -- ret1 is not declared.
     }
   };
 

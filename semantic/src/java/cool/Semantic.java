@@ -37,5 +37,7 @@ public class Semantic{
 		ScopeTableImpl ST = new ScopeTableImpl(program, IG, CT);
     // System.out.print("checking node bfs: " + CT.cnHm);
     // System.out.print("\n");
+    if (CT.ErrorStatus == true || ST.ErrorStatus == true)
+    	System.exit(1);
 	}
 }

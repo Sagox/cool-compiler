@@ -1,5 +1,5 @@
 (*
-  Class Cycle
+  We cannot Inherit from Bool, Int and String
 *)
 (*
   Inherit Bool

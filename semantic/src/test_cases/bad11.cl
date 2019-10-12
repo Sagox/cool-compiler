@@ -12,18 +12,18 @@ Class A {
 
   redeclare(x: String, y: Int) : Int {
     {
-      ret <- "bla";
-      if y < "x" then a <- 5 else 0
+      ret <- "bla"; -- cannot assign String to Int type identifier.
+      if y < "x" then a <- 5 else 0 -- '<' should be applied on Int types (LHS and RHS)
       fi;
-      if y <= "x" then a <- 5 else 0
+      if y <= "x" then a <- 5 else 0 -- '<=' should be applied on Int types (LHS and RHS)
       fi;
-      ret <- ~x;
+      ret <- ~x; -- complement can only be applied on Int type.
     }
   };
 
   redeclare1(x: String) : Bool {
     {
-      b <- not x;
+      b <- not x; -- negation can only be applied on Bool
     }
   };
 
@@ -32,7 +32,7 @@ Class A {
 class Main inherits IO {
   main() : Object {
     {
-      (new LazyPerson).init1();
+      (new LazyPerson).init1(); -- LazyPerson is undefined so we cant use 'new' on it,
     }
   } ;
 } ;

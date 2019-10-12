@@ -1,6 +1,7 @@
 (*
 no main
  *)
-class Main {
+
+class Main { -- method 'main' is missing
 };
 

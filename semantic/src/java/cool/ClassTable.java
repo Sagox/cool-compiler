@@ -6,6 +6,7 @@ public class ClassTable {
 
   public HashMap<String, ClassNode> cnHm = new HashMap<String, ClassNode>();
   public HashMap<String, Integer> classScope = new HashMap<String, Integer>();
+  public boolean ErrorStatus = false;
 
   ClassTable(AST.program program) {
         /*
@@ -85,13 +86,17 @@ public class ClassTable {
     for(int i = 0; i < currClass.features.size(); i++) {
       if(currClass.features.get(i).getClass() == AST.method.class) {
           AST.method currMethod = (AST.method) currClass.features.get(i);
-          if(currMethods.containsKey(currMethod.name))
+          if(currMethods.containsKey(currMethod.name)) {
             ErrorReporter.reportError(currClass.filename, currMethod.lineNo, ": Method - '" + currMethod.name + "' is redefined.");
+            ErrorStatus = true;
+          }
           else currMethods.put(currMethod.name, currMethod);
       } else if(currClass.features.get(i).getClass() == AST.attr.class) {
           AST.attr currAttr = (AST.attr) currClass.features.get(i);
-          if(currAttrs.containsKey(currAttr.name))
+          if(currAttrs.containsKey(currAttr.name)) {
             ErrorReporter.reportError(currClass.filename, currAttr.lineNo, ": Attribute - '" + currAttr.name + "' is redefined");
+            ErrorStatus = true;
+          }
           else currAttrs.put(currAttr.name, currAttr);
       }
     }
@@ -108,6 +113,7 @@ public class ClassTable {
         if(currMethod.formals.size() != parentMethod.formals.size()) {
           // check
           ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Incorrect number of arguments in child class's method - '" + currMethod.name + "'");
+          ErrorStatus = true;
           flag = false;
         } else {
           // same number of parameters so check all parameters
@@ -116,6 +122,8 @@ public class ClassTable {
               // check
               ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Child class's method - '" + currMethod.name + "' parameter type"
                   + currMethod.formals.get(i).typeid + " is not equal to parent's parameter type '" + parentMethod.formals.get(i).typeid + "'");
+
+              ErrorStatus = true;
               flag = false;
             }
           }
@@ -125,6 +133,7 @@ public class ClassTable {
           // check
           ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Child class's method - '" + currMethod.name + "' return type '"
               + currMethod.typeid + "' is not equal to parent's return type '" + parentMethod.typeid + "'");
+          ErrorStatus = true;
           flag = false;
         }
       }
@@ -133,10 +142,11 @@ public class ClassTable {
     }
     // attr
     for(String currAttrName : currAttrs.keySet()) {
-      if(currNode.attrs.containsKey(currAttrName))
+      if(currNode.attrs.containsKey(currAttrName)) {
         // check
         ErrorReporter.reportError(currClass.filename, currAttrs.get(currAttrName).lineNo, "Attribute - '" + currAttrs.get(currAttrName).name + "' is redefined");
-      else currNode.attrs.put(currAttrName, currAttrs.get(currAttrName));
+        ErrorStatus = true;
+      } else currNode.attrs.put(currAttrName, currAttrs.get(currAttrName));
     }
     // now add this node
     cnHm.put(currNode.name, currNode);

@@ -18,7 +18,8 @@ Class A {
 Class B inherits A {
   ret1 : String;
 
-  redeclare(x : Int, s : String) : String {
+  redeclare(x : Int, s : String) : String { -- child's method has more number of parameters than what is defined in parent
+  -- child's method return type is different from parent's method.
     {
       ret1 <- "bla";
     }
