@@ -21,6 +21,9 @@ public class Semantic{
 
 		// the constructor of this class takes the AST.program as an argument using which the inheritance
 		// graph is built, while building, basic checks on classes are also done.
+		for(AST.class_ classe : program.classes) {
+			// System.out.println(classe.name);
+		}
 		String filename = program.classes.get(0).filename;
 		InheritanceGraph IG = new InheritanceGraph(program);
 		// IG.printInheritanceGraph();

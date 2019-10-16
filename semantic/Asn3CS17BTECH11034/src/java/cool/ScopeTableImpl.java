@@ -82,6 +82,7 @@ public class ScopeTableImpl {
       }
       else if(currClass.features.get(i).getClass() == AST.attr.class){
         AST.attr currAttr = (AST.attr) currClass.features.get(i);
+        // System.out.println(currAttr.name + ", " + currAttr.value.getClass());
         if(currAttr.value.getClass() != AST.no_expr.class) {
             traverseNode(currAttr.value);
             if(CT.typeCheck(currAttr.value.type, currAttr.typeid) == false) {
@@ -105,6 +106,7 @@ private void traverseNode(AST.expression expr) {
     // object
     else if(expr.getClass() == AST.object.class) {
       AST.object curExp = (AST.object)expr;
+      // System.out.println(expr.getClass());
       if(st.lookUpGlobal(curExp.name) == null) {
           ErrorReporter.reportError(filename, curExp.lineNo, " Identifier - '" + curExp.name + "' is not declared");
           ErrorStatus = true;
@@ -476,6 +478,9 @@ private void traverseNode(AST.expression expr) {
             curBranchType = CT.commAncestor(curBranchType, br.value.type);
         }
         curExp.type = curBranchType;
+    }
+    else {
+      ErrorReporter.reportError("filename", 5, "Another branch has same type '" + "br.type" + "'.");
     }
   }
 }

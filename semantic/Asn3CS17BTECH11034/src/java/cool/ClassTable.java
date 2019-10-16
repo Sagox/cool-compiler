@@ -7,8 +7,17 @@ public class ClassTable {
   public HashMap<String, ClassNode> cnHm = new HashMap<String, ClassNode>();
   public HashMap<String, Integer> classScope = new HashMap<String, Integer>();
   public boolean ErrorStatus = false;
+  AST.program myprog;
 
+  ArrayList<String> basicClasses = new ArrayList<String>();
   ClassTable(AST.program program) {
+    basicClasses.add("Object");
+    basicClasses.add("IO");
+    basicClasses.add("String");
+    basicClasses.add("Int");
+    basicClasses.add("Bool");
+    myprog = program;
+    for(AST.class_ c: myprog.classes) basicClasses.add(c.name);
         /*
         Object:
            abort()
@@ -86,13 +95,23 @@ public class ClassTable {
     for(int i = 0; i < currClass.features.size(); i++) {
       if(currClass.features.get(i).getClass() == AST.method.class) {
           AST.method currMethod = (AST.method) currClass.features.get(i);
+          if(!basicClasses.contains(currMethod.typeid)) {
+            System.out.println(myprog.classes);
+            ErrorReporter.reportError(currClass.filename, currMethod.lineNo, ": method - '" + currMethod.name + "' belongs to an undefined class");
+            ErrorStatus = true;
+          }
           if(currMethods.containsKey(currMethod.name)) {
             ErrorReporter.reportError(currClass.filename, currMethod.lineNo, ": Method - '" + currMethod.name + "' is redefined.");
             ErrorStatus = true;
           }
           else currMethods.put(currMethod.name, currMethod);
       } else if(currClass.features.get(i).getClass() == AST.attr.class) {
+
           AST.attr currAttr = (AST.attr) currClass.features.get(i);
+          if(!basicClasses.contains(currAttr.typeid)) {
+            ErrorReporter.reportError(currClass.filename, currAttr.lineNo, ": Attribute - '" + currAttr.name + "' belongs to an undefined class");
+            ErrorStatus = true;
+          }
           if(currAttrs.containsKey(currAttr.name)) {
             ErrorReporter.reportError(currClass.filename, currAttr.lineNo, ": Attribute - '" + currAttr.name + "' is redefined");
             ErrorStatus = true;
@@ -129,6 +148,7 @@ public class ClassTable {
           }
         }
         // check return type
+
         if(currMethod.typeid.equals(parentMethod.typeid) == false) {
           // check
           ErrorReporter.reportError(currClass.filename, currMethod.lineNo, "Child class's method - '" + currMethod.name + "' return type '"
@@ -154,10 +174,14 @@ public class ClassTable {
   }
 
   public boolean typeCheck(String cl1, String cl2) {
+
     while(cl1 != null && cl2 != null) {
       if (cl1.equals(cl2))
         return true;
-      cl1 = cnHm.get(cl1).parent;
+      ClassNode temp = cnHm.get(cl1);
+      if(temp != null)
+        cl1 = cnHm.get(cl1).parent;
+      else return false;
     }
     return false;
   }
