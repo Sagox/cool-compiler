@@ -4,32 +4,34 @@ import java.io.PrintWriter;
 import java.util.*;
 
 public class LLVMIRPrinter {
+	PrintWriter out;
 
-	LLVMIRPrinter() {
+	LLVMIRPrinter(PrintWriter tofile) {
+		out = tofile;
 	}
 
 	void printMetaData(AST.program program) {
 		String filename = program.classes.get(0).filename;
 		// assumed to be same as filename
-		System.out.println("; ModuleID = \""+filename+"\"");
-		System.out.println("source_filename = \""+filename+"\"");
+		out.println("; ModuleID = \""+filename+"\"");
+		out.println("source_filename = \""+filename+"\"");
 		// layout is in the following format
 		// little endian | name mangling | int size and alignment | float size and alignment
 		// | native integer widths supported | stack allignment
-		System.out.println("target datalayout = \"e-m:e-i64:64-f80:128-n8:16:32:64-S128\"");
-		System.out.println("target triple = \"x86_64-unknown-linux-gnu\"");
+		out.println("target datalayout = \"e-m:e-i64:64-f80:128-n8:16:32:64-S128\"");
+		out.println("target triple = \"x86_64-unknown-linux-gnu\"");
 	}
 
 	void printDeclaration(ArrayList<TypeUtils.TypeID> args, TypeUtils.TypeID retType, String name) {
-        System.out.print("\ndefine " + TypeUtils.getIRRep(retType) + " @" + name + "( ");
+        out.print("\ndefine " + TypeUtils.getIRRep(retType) + " @" + name + "( ");
         for(int i=0;i<args.size();i++) {
             if (i < args.size() - 1) {
-                System.out.print(TypeUtils.getIRRep(args.get(i)) + ", ");
+                out.print(TypeUtils.getIRRep(args.get(i)) + ", ");
             } else {
-                System.out.print(TypeUtils.getIRRep(args.get(i)));
+                out.print(TypeUtils.getIRRep(args.get(i)));
             }
         }
-        System.out.println(" )\n");
+        out.println(" )\n");
 	}
 
 	// Declarations of C functions which are used by default classes of cool
@@ -49,9 +51,25 @@ public class LLVMIRPrinter {
 
 		// strncpy
 		printDeclaration(StringFunctionArguments, TypeUtils.TypeID.INT8PTR, "strncpy");
-		
+
 		// strlen
 		printDeclaration(new ArrayList<TypeUtils.TypeID>(Arrays.asList(TypeUtils.TypeID.INT8PTR)),
 			TypeUtils.TypeID.INT8PTR, "strlen");
+
+		ArrayList<TypeUtils.TypeID> IOFunctionArguments = new ArrayList<TypeUtils.TypeID>();		
+		IOFunctionArguments.add(TypeUtils.TypeID.INT8PTR);
+		IOFunctionArguments.add(TypeUtils.TypeID.VARARG);
+		//printf
+		printDeclaration(IOFunctionArguments, TypeUtils.TypeID.INT32, "printf");
+		//scanf
+		printDeclaration(IOFunctionArguments, TypeUtils.TypeID.INT32, "scanf");
+
+		// malloc
+		printDeclaration(new ArrayList<TypeUtils.TypeID>(Arrays.asList(TypeUtils.TypeID.INT32)),
+			TypeUtils.TypeID.INT8PTR, "malloc");
+		// exit
+		printDeclaration(new ArrayList<TypeUtils.TypeID>(Arrays.asList(TypeUtils.TypeID.INT32)),
+			TypeUtils.TypeID.VOID, "exit");
+
 	}
 }
