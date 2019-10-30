@@ -8,8 +8,9 @@ public class Codegen{
 		//Write Code generator code here
         out.println("; I am a comment in LLVM-IR. Feel free to remove me.");
         LLVMIRPrinter printer = new LLVMIRPrinter(out);
-        ClassTable classTable = new ClassTable();
         printer.printMetaData(program);
         printer.printRequiredCFunctionsDeclaration();
+        ClassTable classTable = new ClassTable();
+        printer.generateIRForMainClass(program);
 	}
 }

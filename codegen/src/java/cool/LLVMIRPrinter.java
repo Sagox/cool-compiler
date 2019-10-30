@@ -23,7 +23,7 @@ public class LLVMIRPrinter {
 	}
 
 	void printDeclaration(ArrayList<TypeUtils.TypeID> args, TypeUtils.TypeID retType, String name) {
-        out.print("\ndefine " + TypeUtils.getIRRep(retType) + " @" + name + "( ");
+        out.print("declare " + TypeUtils.getIRRep(retType) + " @" + name + "( ");
         for(int i=0;i<args.size();i++) {
             if (i < args.size() - 1) {
                 out.print(TypeUtils.getIRRep(args.get(i)) + ", ");
@@ -72,4 +72,21 @@ public class LLVMIRPrinter {
 			TypeUtils.TypeID.VOID, "exit");
 
 	}
+
+    void generateDefUtil(TypeUtils.TypeID retType, String name, List<ArgumentInfo> args) {
+        out.print("\ndefine " + TypeUtils.getIRRep(retType) + " @" + name + "( ");
+        for(int i=0;i<args.size();i++) {
+            if (i < args.size()) {
+                out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name + ", ");
+            } else {
+                out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name);
+            }
+        }
+        out.println(" ) {\nentry:");
+    }
+
+    void generateIRForMainClass(AST.program program) {
+    	for(AST.class_ cl: program.classes){
+    	}
+    }
 }
