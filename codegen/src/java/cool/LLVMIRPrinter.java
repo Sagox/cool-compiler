@@ -73,7 +73,7 @@ public class LLVMIRPrinter {
 
 	}
 
-    void generateDefUtil(TypeUtils.TypeID retType, String name, List<ArgumentInfo> args) {
+    void beginDefinition(TypeUtils.TypeID retType, String name, List<ArgumentInfo> args) {
         out.print("\ndefine " + TypeUtils.getIRRep(retType) + " @" + name + "( ");
         for(int i=0;i<args.size();i++) {
             if (i < args.size()) {
@@ -87,6 +87,9 @@ public class LLVMIRPrinter {
 
     void generateIRForMainClass(AST.program program) {
     	for(AST.class_ cl: program.classes){
+    		if(cl.name == "Main") {
+
+    		}
     	}
     }
 }
