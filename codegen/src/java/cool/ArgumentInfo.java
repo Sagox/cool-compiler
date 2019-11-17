@@ -5,5 +5,10 @@ import java.util.*;
 
 public class ArgumentInfo{
 	String name;
-	TypeUtils.TypeID type;
+	TypeUtils type;
+	ArgumentInfo(String gname, TypeUtils t) {
+		name = gname;
+		type = t;
+	}
+
 }

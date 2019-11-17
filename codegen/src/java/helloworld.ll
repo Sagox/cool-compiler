@@ -19,3 +19,7 @@ declare i8* @malloc( i32 )
 
 declare void @exit( i32 )
 
+
+define i32 @main(  ) {
+entry:
+	%Main_obj = alloca %class_Main

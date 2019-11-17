@@ -10,12 +10,28 @@ import java.io.PrintWriter;
 
 public class TypeUtils {
 	// All the types
+
+    String name;
+
     enum TypeID {
-        EMPTY, VOID, INT1, INT1PTR, INT1DOUBLEPTR, INT8, INT8PTR, INT8DOUBLEPTR, INT32, INT32PTR, INT32DOUBLEPTR, VARARG, OBJ, OBJPTR, OBJDOUBLEPTR
+        EMPTY, VOID, INT1, INT1PTR, INT1DOUBLEPTR, INT8, INT8PTR, INT8DOUBLEPTR, INT32, INT32PTR, INT32DOUBLEPTR, VARARG, OBJ, OBJPTR, OBJDOUBLEPTR, CLASS
     }
 
-    static String getIRRep(TypeID t) {
-    	switch(t) {
+    TypeID gt;
+    int pointerDepth = 0;
+    TypeUtils(TypeUtils.TypeID t) {
+        gt = t;
+    }
+
+    TypeUtils(TypeUtils.TypeID t, String cname, int pd) {
+        gt = t;
+        name = cname;
+        pointerDepth = pd;
+    }
+
+    static String getIRRep(TypeUtils t) {
+        String ps = "*";
+    	switch(t.gt) {
     		case EMPTY:
     			return "";
     		case VOID:
@@ -40,6 +56,8 @@ public class TypeUtils {
     			return "i32**";
     		case VARARG:
     			return "...";
+            case CLASS:
+                return "%" + t.name + ps.repeat(t.pointerDepth);
     	}
     	return "";
     }
