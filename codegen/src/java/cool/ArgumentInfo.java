@@ -4,10 +4,10 @@ import java.io.PrintWriter;
 import java.util.*;
 
 public class ArgumentInfo{
-	String name;
-	TypeUtils type;
+	public String name;
+	public TypeUtils type;
 	ArgumentInfo(String gname, TypeUtils t) {
-		name = gname;
+		name = "%" + gname;
 		type = t;
 	}
 

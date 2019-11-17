@@ -23,3 +23,7 @@ declare void @exit( i32 )
 define i32 @main(  ) {
 entry:
 	%Main_obj = alloca %class_Main
+	%obj1 = call %Main* @Main_Cons_Main( %class_Main %Main_obj )
+	%0 = call %IO @Main_main( %Main* %obj1 )
+	ret i32 %0
+}

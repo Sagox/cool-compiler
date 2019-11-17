@@ -11,6 +11,6 @@ public class Codegen{
         printer.printMetaData(program);
         printer.printRequiredCFunctionsDeclaration();
         ClassTable classTable = new ClassTable();
-        printer.generateIRForMainClass(program);
+        printer.generateIRForMainClass(program, classTable);
 	}
 }

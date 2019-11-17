@@ -21,6 +21,8 @@ public class TypeUtils {
     int pointerDepth = 0;
     TypeUtils(TypeUtils.TypeID t) {
         gt = t;
+        name = "";
+        pointerDepth = 0;
     }
 
     TypeUtils(TypeUtils.TypeID t, String cname, int pd) {

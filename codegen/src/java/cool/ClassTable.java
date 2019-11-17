@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 
 public class ClassTable {
-	private HashMap<String, ClassPlus> classes=new HashMap<String, ClassPlus>();		// for retrieving class related info and class attributes and features
+	private  HashMap<String, ClassPlus> classes=new HashMap<String, ClassPlus>();		// for retrieving class related info and class attributes and features
 	private HashMap<String, Integer> height = new HashMap<String, Integer>();			// for retrieving class height in the inheritance hierarchy (for conformance check)
 	public List<Error> errors = new ArrayList<Error>();
 	
@@ -167,6 +167,12 @@ public class ClassTable {
 		return classes.get(className).alist;
 	}
 	
+	ArrayList<AST.attr> getJustAttrs(String className) {
+		ClassPlus cl = classes.get(className);
+		// System.out.println("\n\n\n\n45454545" + cl);
+		return cl.justAttrs;
+	}
+
 	ClassPlus getClassPlus(String className) {
 		return classes.get(className);
 	}
