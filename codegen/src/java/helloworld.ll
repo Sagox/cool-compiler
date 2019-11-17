@@ -19,4 +19,3 @@ declare i8* @malloc( i32 )
 
 declare void @exit( i32 )
 
-Main

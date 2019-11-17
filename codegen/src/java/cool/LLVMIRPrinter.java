@@ -88,7 +88,7 @@ public class LLVMIRPrinter {
     void generateIRForMainClass(AST.program program) {
     	for(AST.class_ cl: program.classes){
     		if(cl.name == "Main") {
-
+    			// beginDefinition();
     		}
     	}
     }
