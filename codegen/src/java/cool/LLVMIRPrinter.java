@@ -336,8 +336,8 @@ public class LLVMIRPrinter {
 		ArrayList<ArgumentInfo> argList = new ArrayList<ArgumentInfo>();
         argList.add(new ArgumentInfo("Main_obj", coolTypeToLLVMType("Main", 0)));
         printCallInstruction(new ArrayList<TypeUtils>(), "Main_Cons_Main",
-        	true, argList, new ArgumentInfo("obj1", new TypeUtils(TypeUtils.TypeID.CLASS, "Main", 1)));
-        argList.set(0, new ArgumentInfo("obj1", new TypeUtils(TypeUtils.TypeID.CLASS, "Main", 1)));
+        	true, argList, new ArgumentInfo("obj1", coolTypeToLLVMType("Main", 1)));
+        argList.set(0, new ArgumentInfo("obj1", coolTypeToLLVMType("Main", 1)));
         TypeUtils tempTypeUtilsObject = new TypeUtils(TypeUtils.TypeID.EMPTY);
         for(AST.feature ftre : mainClass.features) {
             if(ftre.getClass() == AST.method.class) {
@@ -346,7 +346,7 @@ public class LLVMIRPrinter {
                     if(mthdTemp.typeid.equals("Object"))
                         tempTypeUtilsObject = new TypeUtils(TypeUtils.TypeID.VOID);
                     else
-                        tempTypeUtilsObject = new TypeUtils(TypeUtils.TypeID.CLASS, mthdTemp.typeid, 0);
+                        tempTypeUtilsObject = coolTypeToLLVMType(mthdTemp.typeid, 0);
                     break;
                 }
             }
