@@ -10,7 +10,7 @@ public class Codegen{
         LLVMIRPrinter printer = new LLVMIRPrinter(out);
         printer.printMetaData(program);
         printer.printRequiredCFunctionsDeclaration();
-        ClassTable classTable = new ClassTable();
+        ClassTable classTable = Semantic.classTable;
         printer.generateIRForMainClass(program, classTable);
 	}
 }
