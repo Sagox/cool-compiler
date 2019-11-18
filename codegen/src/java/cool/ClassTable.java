@@ -9,7 +9,7 @@ public class ClassTable {
 	private  HashMap<String, ClassPlus> classes=new HashMap<String, ClassPlus>();		// for retrieving class related info and class attributes and features
 	private HashMap<String, Integer> height = new HashMap<String, Integer>();			// for retrieving class height in the inheritance hierarchy (for conformance check)
 	public List<Error> errors = new ArrayList<Error>();
-	
+
 	public ClassTable() {
 		/* Classes already present in the table:
 		 * - Object
@@ -17,7 +17,7 @@ public class ClassTable {
 		 * - String
 		 * - Int
 		 * - Bool
-		 * 
+		 *
 		 * Object has methods:
 		 * - abort() : Object
 		 * - type_name(): String
@@ -31,21 +31,21 @@ public class ClassTable {
 		 * - concat(s: String) : String
 		 * - substr(i : Int, l : Int) : String
 		 */
-		
+
 		HashMap<String, AST.method> ol = new HashMap <String, AST.method>();
 		ol.put("abort", new AST.method("abort", new ArrayList<AST.formal>(), "Object", new AST.no_expr(0), 0));
 		ol.put("type_name", new AST.method("type_name", new ArrayList<AST.formal>(), "String", new AST.no_expr(0), 0));
 
 		classes.put("Object", new ClassPlus("Object", null, new HashMap<String, AST.attr>(), ol));
 		height.put("Object", 0);
-		
+
 		HashMap <String, AST.method> iol = new HashMap<String, AST.method>();
-		
+
 		List <AST.formal> os_formals = new ArrayList<AST.formal>();
 		os_formals.add(new AST.formal("out_string", "String", 0));
 		List <AST.formal> oi_formals = new ArrayList<AST.formal>();
-		oi_formals.add(new AST.formal("out_int", "Int", 0));		
-		
+		oi_formals.add(new AST.formal("out_int", "Int", 0));
+
 		iol.put("out_string", new AST.method("out_string", os_formals, "IO", new AST.no_expr(0), 0));
 		iol.put("out_int", new AST.method("out_int", oi_formals, "IO", new AST.no_expr(0), 0));
 		iol.put("in_string", new AST.method("in_string", new ArrayList<AST.formal>(), "String", new AST.no_expr(0), 0));
@@ -53,26 +53,26 @@ public class ClassTable {
 		classes.put("IO", new ClassPlus("IO", "Object", new HashMap<String, AST.attr>(), iol));
 		classes.get("IO").mlist.putAll(ol);		// IO inherits from Object
 		height.put("IO", 1);
-		
+
 		classes.put("Int", new ClassPlus("Int", "Object", new HashMap<String, AST.attr>(), new HashMap<String, AST.method>()));
 		height.put("Int", 1);
 		classes.get("Int").mlist.putAll(ol);	// Int inherits from Object
-		
+
 		classes.put("Bool", new ClassPlus("Bool", "Object", new HashMap<String, AST.attr>(), new HashMap<String, AST.method>()));
 		height.put("Bool", 1);
 		classes.get("Bool").mlist.putAll(ol);	// Bool inherits from Object
-		
+
 		HashMap <String, AST.method> sl = new HashMap<String, AST.method>();
 		List<AST.formal> concat_formal = new ArrayList<AST.formal>();
 		concat_formal.add(new AST.formal("s", "String", 0));
 		List<AST.formal> substr_formal = new ArrayList<AST.formal>();
 		substr_formal.add(new AST.formal("i", "Int", 0));
 		substr_formal.add(new AST.formal("l", "Int", 0));
-		
+
 		sl.put("length", new AST.method("length", new ArrayList<AST.formal>(), "Int", new AST.no_expr(0), 0));
 		sl.put("concat", new AST.method("concat", concat_formal, "String", new AST.no_expr(0), 0));
 		sl.put("substr", new AST.method("substr", substr_formal, "String", new AST.no_expr(0), 0));
-		
+
 		classes.put("String", new ClassPlus("String", "Object", new HashMap<String, AST.attr>(), sl));
 		height.put("String", 1);
 		classes.get("String").mlist.putAll(ol);		// String Inherits from Object
@@ -86,10 +86,10 @@ public class ClassTable {
 		String pr = c.parent;
 		ClassPlus tc = new ClassPlus(c.name, c.parent, classes.get(c.parent).alist, classes.get(c.parent).mlist);	// adding the parents attribute list and method list
 
-		
+
 		HashMap <String, AST.attr> tc_alist = new HashMap<String, AST.attr>();
 		HashMap <String, AST.method> tc_mlist = new HashMap <String, AST.method>();
-		
+
 		/* Checks for the following errors within a class:
 		 * - multiple attribute definitions
 		 * - multiple method definitions
@@ -111,7 +111,7 @@ public class ClassTable {
 			}
 		}
 
-		
+
 		/* Checks for the following errors with respect to the inherited class:
 		 * - redefinition of an inherited attribute (Note: the class retains the inherited attribute and discards the attribute defined within the class)
 		 * - wrong redefinition of an inherited method (Note : the class retains the inherited method and discards the method defined within the class)
@@ -157,20 +157,38 @@ public class ClassTable {
 
 		classes.put(c.name, tc);
 	}
-	
-	
+
+
 	List<Error> getErrors() {
 		return errors;
 	}
-	
+
 	HashMap<String, AST.attr> getAttrs(String className) {
 		return classes.get(className).alist;
 	}
-	
+
 	ArrayList<AST.attr> getJustAttrs(String className) {
 		ClassPlus cl = classes.get(className);
 		// System.out.println("\n\n\n\n45454545" + cl);
-		return cl.justAttrs;
+		// for(ClassPlus a : classes.values()) {
+		// 	System.out.println(a.name + "\n");
+		// }
+		HashMap <String, AST.attr> cl1 = classes.get(className).alist;
+    Collection<AST.attr> values = cl1.values();
+    ArrayList<AST.attr> valueList = new ArrayList<AST.attr>(values);
+    return valueList;
+	}
+
+	ArrayList<AST.method> getJustMethods(String className) {
+		ClassPlus cl = classes.get(className);
+		// System.out.println("\n\n\n\n45454545" + cl);
+		// for(ClassPlus a : classes.values()) {
+		// 	System.out.println(a.name + "\n");
+		// }
+		HashMap <String, AST.method> cl1 = classes.get(className).mlist;
+    Collection<AST.method> values = cl1.values();
+    ArrayList<AST.method> valueList = new ArrayList<AST.method>(values);
+    return valueList;
 	}
 
 	ClassPlus getClassPlus(String className) {
@@ -186,7 +204,7 @@ public class ClassTable {
 			else return conforms(a, b);
 		}
 	}
-	
+
 	String lca(String a, String b) {
 
 		if(a.equals(b)) return a;

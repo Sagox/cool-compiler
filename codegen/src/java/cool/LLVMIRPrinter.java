@@ -45,7 +45,7 @@ public class LLVMIRPrinter {
 		StringFunctionArguments.add(new TypeUtils(TypeUtils.TypeID.INT8PTR));
 		StringFunctionArguments.add(new TypeUtils(TypeUtils.TypeID.INT8PTR));
  		// strcpy
-		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.TypeID.INT8PTR), "strcpy"); 
+		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.TypeID.INT8PTR), "strcpy");
 
 		// strcmp
 		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.TypeID.INT8PTR), "strcmp");
@@ -58,7 +58,7 @@ public class LLVMIRPrinter {
 		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.TypeID.INT8PTR))),
 			new TypeUtils(TypeUtils.TypeID.INT8PTR), "strlen");
 
-		ArrayList<TypeUtils> IOFunctionArguments = new ArrayList<TypeUtils>();		
+		ArrayList<TypeUtils> IOFunctionArguments = new ArrayList<TypeUtils>();
 		IOFunctionArguments.add(new TypeUtils(TypeUtils.TypeID.INT8PTR));
 		IOFunctionArguments.add(new TypeUtils(TypeUtils.TypeID.VARARG));
 		//printf
@@ -79,7 +79,7 @@ public class LLVMIRPrinter {
         out.print("%class." + className + " = type { ");
         int i = 0;
         while(i < attributes.size()) {
-            if (i == attributes.size() - 1) { 
+            if (i == attributes.size() - 1) {
                 out.print(TypeUtils.getIRRep(attributes.get(i)));
             } else {
                 out.print(TypeUtils.getIRRep(attributes.get(i)) + ", ");
@@ -118,11 +118,11 @@ public class LLVMIRPrinter {
                 case '\t':
                     out.print("\\09");
                     break;
-                default: 
+                default:
                     out.print(chr);
             }
             i++;
-        }   
+        }
     }
 
     public void StringUtil(AST.expression expr, Integer strLine) {
@@ -169,7 +169,7 @@ public class LLVMIRPrinter {
         out.print("\t");
         if (resultOp.type.gt == TypeUtils.TypeID.VOID) {
             out.print("call " + TypeUtils.getIRRep(resultOp.type));
-        } else 
+        } else
         out.print(resultOp.name + " = call " + TypeUtils.getIRRep(resultOp.type));
         int sz = argTypes.size();
         if ( sz > 0) {
@@ -188,11 +188,11 @@ public class LLVMIRPrinter {
             out.print(" %");
         } else {
             out.print(" @");
-        } 
+        }
         out.print(methodName + "( ");
         int i = 0;
         while(i < args.size()) {
-            if (i == args.size() - 1) {      
+            if (i == args.size() - 1) {
                 out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name);
             } else {
                 out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name + ", ");
@@ -224,7 +224,7 @@ public class LLVMIRPrinter {
     void loadInstUtil(TypeUtils type, ArgumentInfo op, ArgumentInfo result, String nameVar) {
         out.print("\t" + TypeUtils.getIRRep(result.type) + " = load " + TypeUtils.getIRRep(type) + ", " + TypeUtils.getIRRep(op.type) + " " + op.name + "\n");
     }
-    
+
     void storeInstUtil(ArgumentInfo op, ArgumentInfo result, String nameVar) {
         out.print("\tstore " + TypeUtils.getIRRep(op.type) + " " + op.name + ", " + TypeUtils.getIRRep(result.type) + " " + result.name + "\n");
     }
@@ -233,19 +233,19 @@ public class LLVMIRPrinter {
 
     //     // Name of constructor (mangled)
     //     String mthdName = clsName + "_Cons_" + clsName;
-    
+
     //     // List of OpClass for attributes
     //     List<ArgumentInfo> attrOperandList = new ArrayList<ArgumentInfo>();
     //     attrOperandList.add(new ArgumentInfo(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), "this"));
-    
+
     //     // Define the constructor and establish pointer information
     //     beginDefinition(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), mthdName, attrOperandList);
     //     printAllocaInstruction(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), new ArgumentInfo(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), "this.addr"));
-        
+
     //     // Performing load and store operations for constructors
     //     storeInstUtil(out, new OpClass(operandType(clsName, true, 1), "this"), new OpClass(operandType(clsName, true, 2), "this" + ".addr"), null);
     //     loadInstUtil(out, operandType(clsName, true, 1), new OpClass(operandType(clsName, true, 2), "this" + ".addr"), new OpClass(operandType(clsName, true, 1), "this1"), null);
-    
+
     //     List<AST.attr> attrListTemp = classTable.getJustAttrs(clsName);
     //     int i = 0;
     //     while(i < attrListTemp.size()) {
@@ -253,7 +253,7 @@ public class LLVMIRPrinter {
     //         ArgumentInfo res = new ArgumentInfo(attrTemp.name, new TypeUtils(TypeUtils.TypeID.INT32));
     //         List<ArgumentInfo> operandList = new ArrayList<ArgumentInfo>();
     //         operandList.add(new ArgumentInfo(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), "this1"));
-        
+
     //         if (attrTemp.typeid.equals("Bool") == true) {
     //             // Bool attribute codegen
     //             operandList.add((ArgumentInfo)new CoolInt(0));
@@ -315,7 +315,7 @@ public class LLVMIRPrinter {
             out.print("void\n");
         } else {
             out.print(TypeUtils.getIRRep(op.type) + " " + op.name + "\n");
-        }  
+        }
         out.print("}\n");
     }
 
@@ -354,16 +354,16 @@ public class LLVMIRPrinter {
         printCallInstruction(new ArrayList<TypeUtils>(), "Main_main", true, argList, new ArgumentInfo("0", tempTypeUtilsObject));
         returnInstUtil((ArgumentInfo)new CoolInt(0), "");
 
-        // List<TypeUtils> attrTypesList = new ArrayList<TypeUtils>();
-        // for(AST.attr attrTemp : classTable.getJustAttrs(mainClass.name)) {
-        //     attrTypesList.add(new TypeUtils(TypeUtils.TypeID.CLASS, attrTemp.typeid, 1));
-        //     if(attrTemp.typeid.equals("String") && attrTemp.value.getClass() == AST.string_const.class) {
-        //         // Means the current attribute is a string constant
-        //         StringUtil(attrTemp.value, 0);
-        //     }
-        // }
-        // // Generates the define code for attributes of class
-        // printClassType(mainClass.name, attrTypesList, null);
+        List<TypeUtils> attrTypesList = new ArrayList<TypeUtils>();
+        for(AST.attr attrTemp : classTable.getJustAttrs(mainClass.name)) {
+            attrTypesList.add(new TypeUtils(TypeUtils.TypeID.CLASS, attrTemp.typeid, 1));
+            if(attrTemp.typeid.equals("String") && attrTemp.value.getClass() == AST.string_const.class) {
+                // Means the current attribute is a string constant
+                StringUtil(attrTemp.value, 0);
+            }
+        }
+        // Generates the define code for attributes of class
+        printClassType(mainClass.name, attrTypesList, null);
 
         // Generating code for assignment of type names
         // generateConstructorOfClass(out, printUtil, cl.name, new InstructionInfo(), cl, classTable, functionFormalNameList);

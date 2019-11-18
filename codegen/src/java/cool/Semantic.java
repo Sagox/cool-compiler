@@ -28,60 +28,60 @@ public class Semantic{
 */
 
 	ScopeTable<AST.attr> scopeTable = new ScopeTable<AST.attr>();
-	ClassTable classTable = new ClassTable();
+	public static ClassTable classTable = new ClassTable();
 	String filename;
-	
+
 	public Semantic(AST.program program){
 		//Write Semantic analyzer code here
-		
+
 		processGraph(program.classes);
 		List<Error> errors = classTable.getErrors();	// ClassTable cannot access reportError method (its not static). Thus, errors are returned in a list (from classTable) and printed.
 		for(Error e : errors) {
 			reportError(e.fname, e.line, e.err);
 		}
-		
+
 		for(AST.class_ e : program.classes) {
-			filename = e.filename;				// filename for each class	
+			filename = e.filename;				// filename for each class
 			scopeTable.enterScope();			// enter new scope for a class
 			scopeTable.insert("self", new AST.attr("self", e.name, new AST.no_expr(e.lineNo), e.lineNo));		// self is available as attribute within the class
 			scopeTable.insertAll(classTable.getAttrs(e.name));		// insert all inherited and other declared attributes within the class into the scope
 			processNode(e);
-			
-			scopeTable.exitScope();				
+
+			scopeTable.exitScope();
 		}
-		
-		
+
+
 		ClassPlus main_class = classTable.getClassPlus("Main");
 		if(main_class == null)
 			reportError(filename, 1, "Program does not contain class 'Main'");
 		else if(main_class.mlist.containsKey("main") == false)
 			reportError(filename, 1, "'Main' class does not contain 'main' method");
-		
-		
+
+
 	}
-	
+
 	private void processGraph(List <AST.class_> classes) {
-		
+
 		Integer sz = 0;		// stores the number of classes
 		HashMap <String, AST.class_> idxCont = new HashMap <String, AST.class_> ();
 		HashMap <String, Integer> classIdx = new HashMap <String, Integer> ();
 		HashMap <Integer, String> idxName = new HashMap <Integer, String>();
 		ArrayList < ArrayList <Integer> > classGraph = new ArrayList < ArrayList <Integer> >();
-		
+
 		List <String> no_redef = Arrays.asList("Object", "String", "Int", "Bool", "IO");
 		List <String> no_inherit = Arrays.asList("String", "Int", "Bool");
 
-		
+
 		classIdx.put("Object", 0);
 		idxName.put(0, "Object");
 		classIdx.put("IO", 1);
 		idxName.put(0, "IO");
-		
+
 		classGraph.add(new ArrayList <Integer> (Arrays.asList(1)));
 		classGraph.add(new ArrayList <Integer>());	// for IO
-		
+
 		sz = sz + 2;	// IO and Object (2 classes) already present
-		
+
 		/* Checking for :
 		 * - bad redefinitions
 		 * - bad inheritance
@@ -103,7 +103,7 @@ public class Semantic{
 				classGraph.add(new ArrayList <Integer> ());
 			}
 		}
-		
+
 		/* We are creating an undirected graph in this method.
 		 * Also: Checking for - undefined parent class error
 		 */
@@ -116,12 +116,12 @@ public class Semantic{
 			int v = classIdx.get(e.name);
 			classGraph.get(u).add(v);			// adding an edge from parent -> child in the graph
 		}
-		
+
 		boolean cycles = false;
 		Boolean[] visited = new Boolean[sz + 10];
 		Arrays.fill(visited, Boolean.FALSE);
 		Queue<Integer> q = new LinkedList<Integer>(); q.offer(0);
-		
+
 		while (!q.isEmpty()) {
 			int u = q.poll();
 			if(visited[u] == false)
@@ -149,11 +149,11 @@ public class Semantic{
 					}
 			}
 		}
-		
+
 		if(cycles) System.exit(1);		// exit if cycles found
-				
+
 		q.clear(); q.offer(0);
-		
+
 		while (!q.isEmpty()) {
 			int u = q.poll();
 			if(u != 1 && u != 0) {
@@ -164,7 +164,7 @@ public class Semantic{
 			}
 		}
 	}
-	
+
 	private void processNode(AST.class_ class_) {
 		/* The method checks if the features are
 		 * attr or method. Corresponding overloaded
@@ -179,12 +179,12 @@ public class Semantic{
 			}
 		}
 	}
-	
+
 	private void processNode(AST.method method) {
 		AST.attr a_self = scopeTable.lookUpLocal("self");	// getting the self (class) object to get class name.
-		
+
 		scopeTable.enterScope();
-		
+
 		for(AST.formal e : method.formals) {
 			AST.feature f = scopeTable.lookUpLocal(e.name);
 			/* Error:
@@ -199,15 +199,15 @@ public class Semantic{
 		processNode(method.body);
 		// if return type conforms to the method type, then hurray
 		if(classTable.conforms(method.body.type, method.typeid) == false) {
-			reportError(filename, method.body.lineNo, "Inferred return type " + method.body.type + 
+			reportError(filename, method.body.lineNo, "Inferred return type " + method.body.type +
 					" of method " + method.name + " does not conform to declared return type " + method.typeid);
 		}
 		scopeTable.exitScope();
 	}
-	
+
 	private void processNode(AST.attr attr) {
 		AST.attr a_self = scopeTable.lookUpLocal("self");	// getting the self (class) object to get class name.
-		
+
 		if(attr.value.getClass() != AST.no_expr.class) {
 			processNode(attr.value);
 			// if return type conforms to the method type, then hurray
@@ -217,7 +217,7 @@ public class Semantic{
 			}
 		}
 	}
-	
+
 	private void processNode(AST.expression expr) {
 		if(expr.getClass() == AST.assign.class)
 			processNode((AST.assign)expr);
@@ -266,7 +266,7 @@ public class Semantic{
 		else if(expr.getClass() == AST.bool_const.class)
 			processNode((AST.bool_const)expr);
 	}
-	
+
 	private void processNode(AST.assign assign) {
 		processNode(assign.e1);
 		AST.attr a = scopeTable.lookUpGlobal(assign.name);
@@ -285,11 +285,11 @@ public class Semantic{
 		AST.method m = null;
 		boolean found = false;
 		processNode(sd.caller);				// first process the caller.
-		
+
 		for(AST.expression e : sd.actuals)	// then process all of the actual parameters (left-to-right)
 			processNode(e);
 
-		
+
 		ClassPlus c = classTable.getClassPlus(sd.typeid);
 		if(c == null)
 			reportError(filename, sd.lineNo, "Static dispatch to undefined class " + sd.typeid);
@@ -306,9 +306,9 @@ public class Semantic{
 						String actual_type = sd.actuals.get(i).type;
 						String formal_type = m.formals.get(i).typeid;
 						if(classTable.conforms(actual_type, formal_type) == false)
-							reportError(filename, sd.lineNo, "In call of method " + m.name + ", type " + actual_type + " does not conform to declared type " + formal_type);			
+							reportError(filename, sd.lineNo, "In call of method " + m.name + ", type " + actual_type + " does not conform to declared type " + formal_type);
 					}
-				}	
+				}
 			}
 			else {
 				reportError(filename, sd.lineNo, "Static dispatch to undefined method " + sd.name);
@@ -318,20 +318,20 @@ public class Semantic{
 			sd.type = m.typeid;
 		else
 			sd.type = "Object";
-		
-		
+
+
 	}
-	
+
 	private void processNode(AST.dispatch dispatch) {
 		AST.method m = null;
 		boolean found = false;
 
 		processNode(dispatch.caller);
 
-		
+
 		for(AST.expression e : dispatch.actuals)
 			processNode(e);
-		
+
 		ClassPlus c = classTable.getClassPlus(dispatch.caller.type);
 		if(c == null) {
 			reportError(filename, dispatch.lineNo, "Class " + dispatch.caller.type + " is undefined.");
@@ -348,9 +348,9 @@ public class Semantic{
 						String actual_type = dispatch.actuals.get(i).type;
 						String formal_type = m.formals.get(i).typeid;
 						if(classTable.conforms(actual_type, formal_type) == false)
-							reportError(filename, dispatch.lineNo, "In call of method " + m.name + ", type " + actual_type + " does not conform to declared type " + formal_type);			
+							reportError(filename, dispatch.lineNo, "In call of method " + m.name + ", type " + actual_type + " does not conform to declared type " + formal_type);
 					}
-				}	
+				}
 			}
 			else {
 				reportError(filename, dispatch.lineNo, "Dispatch to undefined method " + dispatch.name);
@@ -360,7 +360,7 @@ public class Semantic{
 			dispatch.type = m.typeid;
 		else
 			dispatch.type = "Object";
-	
+
 	}
 	private void processNode(AST.cond cond) {
 
@@ -418,7 +418,7 @@ public class Semantic{
 		HashMap <String, Boolean> br_types = new HashMap<String, Boolean> ();
 		AST.branch b = typcase.branches.get(0);
 		String typ = b.value.type;
-		
+
 		for(AST.branch br : typcase.branches) {
 			if(br_types.containsKey(br.type) == false)
 				br_types.put(br.type, true);
@@ -456,7 +456,7 @@ public class Semantic{
 		}
 		sub.type = "Int";
 	}
-	
+
 	private void processNode(AST.mul mul) {
 		processNode(mul.e1);
 		processNode(mul.e2);
@@ -465,7 +465,7 @@ public class Semantic{
 		}
 		mul.type = "Int";
 	}
-	
+
 	private void processNode(AST.divide divide) {
 		processNode(divide.e1);
 		processNode(divide.e2);
@@ -473,7 +473,7 @@ public class Semantic{
 			reportError(filename, divide.lineNo, "non-Int arguments: " + divide.e1.type + " / " + divide.e2.type);
 		}
 		divide.type = "Int";
-		
+
 	}
 	private void processNode(AST.comp comp) {	// comp is NOT
 
