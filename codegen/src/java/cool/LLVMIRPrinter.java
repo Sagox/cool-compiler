@@ -7,6 +7,10 @@ public class LLVMIRPrinter {
 	PrintWriter out;
 	public HashMap<String, Integer> stringToLineNoMapping = new HashMap<String, Integer>();
 	public int stringLineNo = 0;
+    public static Integer nestedIfCount;
+    public static Integer nestedLoopCount;
+    public InstructionInfo registerCounter;
+    public VisitNodeClass visitNodeObject;
 	ArrayList<String> functionFormalNameList;
     public static TypeUtils mthdType;
 	LLVMIRPrinter(PrintWriter tofile) {
@@ -102,6 +106,62 @@ public class LLVMIRPrinter {
         out.println(" ) {\nentry:");
     }
 
+    public void allocateMethodAttributes(List<ArgumentInfo> aList) {
+        // alloca for 'this' operand of method
+        printAllocaInstruction(aList.get(0).type, "this.addr");
+
+        // Calling alloca instruction on all method attributes
+        int i = 1;
+        while(i < aList.size()) {
+            printAllocaInstruction(aList.get(i).type, aList.get(i).name.substring(1) + ".addr");
+            i++;
+        }
+
+        // Calling store instruction on all method attributes
+        i = 1;
+        while(i < aList.size()) {
+            storeInstUtil(new ArgumentInfo(aList.get(i).name.substring(1), aList.get(i).type), new ArgumentInfo(aList.get(i).name.substring(1) + ".addr", aList.get(i).type.getPtr()));
+            i++ ;
+        }
+    }
+
+    void callInstUtil(List<TypeUtils> argTypes, String funcName, boolean isGlobal, List<ArgumentInfo> args, ArgumentInfo resultOp) {
+        out.print("\t");
+        if (resultOp.type.gt == TypeUtils.Typegt.VOID) {
+            out.print("call " + resultOp.type.name);
+        } else 
+        out.print(resultOp.name + " = call " + TypeUtils.getIRRep(resultOp.type));
+        int sz = argTypes.size();
+        if ( sz > 0) {
+            out.print(" (");
+            int i = 0;
+            while(i < sz) {
+                if (i == sz - 1) {
+                    out.print(TypeUtils.getIRRep(argTypes.get(i)) + ") ");
+                } else {
+                    out.print(TypeUtils.getIRRep(argTypes.get(i)) + ", ");
+                }
+                i++;
+            }
+        }
+        if (isGlobal != true) {
+            out.print(" %");
+        } else {
+            out.print(" @");
+        } 
+        out.print(funcName + "( ");
+        int i = 0;
+        while(i < args.size()) {
+            if (i == args.size() - 1) {
+                out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name);
+            } else {
+                out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name + ", ");
+            }
+            i++;
+        }
+        out.print(" )\n");
+    }
+
     void stringEscUtil(String str, String nameVar) {
         int i = 0;
         while(i < str.length()) {
@@ -165,6 +225,27 @@ public class LLVMIRPrinter {
         }
     }
 
+    void getElemPtrInstUtil(TypeUtils type, List<ArgumentInfo> operandList, ArgumentInfo result, boolean inbounds) {
+        out.print("\t");
+        if (result.type.gt == TypeUtils.Typegt.VOID) {
+            out.print("getelementptr ");
+        } else {
+            out.print(result.name + " = ");
+            out.print("getelementptr ");
+        }
+        if (inbounds != true) {}
+        else
+            out.print("inbounds ");
+        out.print(TypeUtils.getIRRep(type) + ", ");
+        for(int i = 0; i < operandList.size(); i++) {    
+            if (i == operandList.size() - 1) {
+                out.print(TypeUtils.getIRRep(operandList.get(i).type) + " " + operandList.get(i).name + "\n");
+            } else {
+                out.print(TypeUtils.getIRRep(operandList.get(i).type) + " " + operandList.get(i).name + ", ");
+            }
+        }
+    }
+
     void printCallInstruction(ArrayList<TypeUtils> argTypes, String methodName, boolean isGlobal,
     	ArrayList<ArgumentInfo> args, ArgumentInfo resultOp) {
         out.print("\t");
@@ -222,11 +303,11 @@ public class LLVMIRPrinter {
         out.print("\t%" + name + " = alloca " + TypeUtils.getIRRep(retType) + "\n");
     }
 
-    void loadInstUtil(TypeUtils type, ArgumentInfo op, ArgumentInfo result, String nameVar) {
+    void loadInstUtil(TypeUtils type, ArgumentInfo op, ArgumentInfo result) {
         out.print("\t" + TypeUtils.getIRRep(result.type) + " = load " + TypeUtils.getIRRep(type) + ", " + TypeUtils.getIRRep(op.type) + " " + op.name + "\n");
     }
 
-    void storeInstUtil(ArgumentInfo op, ArgumentInfo result, String nameVar) {
+    void storeInstUtil(ArgumentInfo op, ArgumentInfo result) {
         out.print("\tstore " + TypeUtils.getIRRep(op.type) + " " + op.name + ", " + TypeUtils.getIRRep(result.type) + " " + result.name + "\n");
     }
 
@@ -262,87 +343,87 @@ public class LLVMIRPrinter {
         out.print("\tbr label %" + label + "\n\n");
     }
 
-    // public void generateConstructorOfClass(String clsName, InstructionInfo track, AST.class_ cl, ClassTable classTable) {
+    public void generateConstructorOfClass(String clsName, InstructionInfo track, AST.class_ cl, ClassTable classTable) {
 
-    //     // Name of constructor (mangled)
-    //     String mthdName = clsName + "_Cons_" + clsName;
+        // Name of constructor (mangled)
+        String mthdName = clsName + "_Cons_" + clsName;
 
-    //     // List of OpClass for attributes
-    //     List<ArgumentInfo> attrOperandList = new ArrayList<ArgumentInfo>();
-    //     attrOperandList.add(new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), "this"));
+        // List of OpClass for attributes
+        ArrayList<ArgumentInfo> attrOperandList = new ArrayList<ArgumentInfo>();
+        attrOperandList.add(new ArgumentInfo("this", coolTypeToLLVMType(clsName, 1)));
 
-    //     // Define the constructor and establish pointer information
-    //     beginDefinition(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), mthdName, attrOperandList);
-    //     printAllocaInstruction(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), "this.addr"));
+        // Define the constructor and establish pointer information
+        beginDefinition(coolTypeToLLVMType(clsName, 1), mthdName, attrOperandList);
+        printAllocaInstruction(coolTypeToLLVMType(clsName, 1), "this.addr");
 
-    //     // Performing load and store operations for constructors
-    //     storeInstUtil(out, new OpClass(operandType(clsName, true, 1), "this"), new OpClass(operandType(clsName, true, 2), "this" + ".addr"), null);
-    //     loadInstUtil(out, operandType(clsName, true, 1), new OpClass(operandType(clsName, true, 2), "this" + ".addr"), new OpClass(operandType(clsName, true, 1), "this1"), null);
+        // Performing load and store operations for constructors
+        storeInstUtil(new ArgumentInfo("this", coolTypeToLLVMType(clsName, 1)), new ArgumentInfo("this" + ".addr", coolTypeToLLVMType(clsName, 2)));
+        loadInstUtil(coolTypeToLLVMType(clsName, 1), new ArgumentInfo("this" + ".addr", coolTypeToLLVMType(clsName, 2)), new ArgumentInfo("this1", coolTypeToLLVMType(clsName, 1)));
 
-    //     List<AST.attr> attrListTemp = classTable.getJustAttrs(clsName);
-    //     int i = 0;
-    //     while(i < attrListTemp.size()) {
-    //         AST.attr attrTemp = attrListTemp.get(i);
-    //         ArgumentInfo res = new ArgumentInfo(attrTemp.name, new TypeUtils(TypeUtils.Typegt.INT32));
-    //         List<ArgumentInfo> operandList = new ArrayList<ArgumentInfo>();
-    //         operandList.add(new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), "this1"));
+        List<AST.attr> attrListTemp = classTable.getJustAttrs(clsName);
+        int i = 0;
+        while(i < attrListTemp.size()) {
+            AST.attr attrTemp = attrListTemp.get(i);
+            ArgumentInfo res = new ArgumentInfo(attrTemp.name, new TypeUtils(TypeUtils.Typegt.INT32));
+            List<ArgumentInfo> operandList = new ArrayList<ArgumentInfo>();
+            operandList.add(new ArgumentInfo("this1", coolTypeToLLVMType(clsName, 1)));
 
-    //         if (attrTemp.typeid.equals("Bool") == true) {
-    //             // Bool attribute codegen
-    //             operandList.add((ArgumentInfo)new CoolInt(0));
-    //             operandList.add((ArgumentInfo)new CoolInt(i));
-    //             printUtil.getElemPtrInstUtil(out, operandType(clsName, true, 0), operandList, res, true, null);
-    //             TypeUtils ptr = new TypeUtils(TypeUtils.Typegt.INT1PTR);
-    //             if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
-    //                 track = visitNodeObject.VisitorPattern(out, printUtil, attrTemp.value, track, classTable, mainClass, functionFormalNameList);
-    //                 printUtil.storeInstUtil(out, new OpClass(track.lastInstructionType, String.valueOf(track.registerVal - 1)), new ArgumentInfo(track.lastInstructionType.correspondingPtrType(), attrTemp.name), null);
-    //             } else {
-    //                 storeInstUtil((ArgumentInfo)new CoolBool(false), new ArgumentInfo(ptr, attrTemp.name), null);
-    //             }
-    //         } else if (attrTemp.typeid.equals("String") == true) {
-    //             // String attribute codegen
-    //             operandList.add((ArgumentInfo)new CoolInt(0));
-    //             operandList.add((ArgumentInfo)new CoolInt(i));
-    //             getElemPtrInstUtil(TypeUtils(clsName, true, 0), operandList, res, true, null);
-    //             String lenString = null;
-    //             if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
-    //                 track = visitNodeObject.VisitorPattern(out, printUtil, attrTemp.value, track, classTable, mainClass, functionFormalNameList);
-    //                 storeInstUtil(new ArgumentInfo(track.lastInstructionType, String.valueOf(track.registerVal - 1)), new ArgumentInfo(track.lastInstructionType.correspondingPtrType(), attrTemp.name), null);
-    //             } else {
-    //                 lenString = "[" + 1 + " x i8]";
-    //                 out.println("\tstore i8* getelementptr inbounds (" + lenString + ", " + lenString + "* @.str.empty , i32 0, i32 0), i8** %" + attrTemp.name);
-    //             }
-    //         } else if (attrTemp.typeid.equals("Int") == true) {
-    //             // Int attribute codegen
-    //             operandList.add((ArgumentInfo)new CoolInt(0));
-    //             operandList.add((ArgumentInfo)new CoolInt(i));
-    //             getElemPtrInstUtil(TypeUtils(clsName, true, 0), operandList, res, true, null);
-    //             TypeUtils ptr = new TypeUtils(TypeUtils.Typegt.INT32PTR);
-    //             if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
-    //                 track = visitNodeObject.VisitorPattern(out, printUtil, attrTemp.value, track, classTable, mainClass, functionFormalNameList);
-    //                 storeInstUtil(out, new ArgumentInfo(track.lastInstructionType, String.valueOf(track.registerVal - 1)), new ArgumentInfo(track.lastInstructionType.correspondingPtrType(), attrTemp.name), null);
-    //             } else {
-    //                 storeInstUtil(out, (ArgumentInfo)new CoolInt(0), new ArgumentInfo(ptr, attrTemp.name), null);
-    //             }
-    //         } else {
-    //             // other cases
-    //             operandList.add((ArgumentInfo)new CoolInt(0));
-    //             operandList.add((ArgumentInfo)new CoolInt(i));
-    //             printUtil.getElemPtrInstUtil(operandType(clsName, true, 0), operandList, res, true, null);
-    //             TypeUtils ptr = TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1);
-    //             if ((attrTemp.value.getClass() != AST.no_expr.class)) {
-    //                 track = visitNodeObject.VisitorPattern(printUtil, attrTemp.value, track, classTable, mainClass, functionFormalNameList);
-    //                 storeInstUtil(new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, attrTemp.typeid, 1), String.valueOf(track.registerVal - 1)), new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, attrTemp.typeid, 1).correspondingPtrType(), attrTemp.name), null);
-    //             } else {
-    //                 out.println("\tstore " + TypeUtils(TypeUtils.Typegt.CLASS, attrTemp.typeid, 1).name + " null , " + TypeUtils(attrTemp.typeid, true, 1).name + "* %" + attrTemp.name);
-    //             }
-    //         }
-    //         i++;
-    //     }
-    //     returnInstUtil(out, new OpClass(operandType(clsName, true, 1), "this1"), null);
-    // }
+            if (attrTemp.typeid.equals("Bool") == true) {
+                // Bool attribute codegen
+                operandList.add((ArgumentInfo)new CoolInt(0));
+                operandList.add((ArgumentInfo)new CoolInt(i));
+                getElemPtrInstUtil(coolTypeToLLVMType(clsName, 0), operandList, res, true);
+                TypeUtils ptr = new TypeUtils(TypeUtils.Typegt.INT1PTR);
+                if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
+                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, cl, functionFormalNameList);
+                    storeInstUtil(new ArgumentInfo(String.valueOf(track.registerVal - 1), track.lastInstructionType), new ArgumentInfo(attrTemp.name, track.lastInstructionType.getPtr()));
+                } else {
+                    storeInstUtil((ArgumentInfo)new CoolBool(false), new ArgumentInfo(attrTemp.name, ptr));
+                }
+            } else if (attrTemp.typeid.equals("String") == true) {
+                // String attribute codegen
+                operandList.add((ArgumentInfo)new CoolInt(0));
+                operandList.add((ArgumentInfo)new CoolInt(i));
+                getElemPtrInstUtil(coolTypeToLLVMType(clsName, 0), operandList, res, true);
+                String lenString = null;
+                if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
+                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, cl, functionFormalNameList);
+                    storeInstUtil(new ArgumentInfo(String.valueOf(track.registerVal - 1), track.lastInstructionType), new ArgumentInfo(attrTemp.name, track.lastInstructionType.getPtr()));
+                } else {
+                    lenString = "[" + 1 + " x i8]";
+                    out.println("\tstore i8* getelementptr inbounds (" + lenString + ", " + lenString + "* @.str.empty , i32 0, i32 0), i8** %" + attrTemp.name);
+                }
+            } else if (attrTemp.typeid.equals("Int") == true) {
+                // Int attribute codegen
+                operandList.add((ArgumentInfo)new CoolInt(0));
+                operandList.add((ArgumentInfo)new CoolInt(i));
+                getElemPtrInstUtil(coolTypeToLLVMType(clsName, 0), operandList, res, true);
+                TypeUtils ptr = new TypeUtils(TypeUtils.Typegt.INT32PTR);
+                if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
+                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, cl, functionFormalNameList);
+                    storeInstUtil(new ArgumentInfo(String.valueOf(track.registerVal - 1), track.lastInstructionType), new ArgumentInfo(attrTemp.name, track.lastInstructionType.getPtr()));
+                } else {
+                    storeInstUtil((ArgumentInfo)new CoolInt(0), new ArgumentInfo(attrTemp.name, ptr));
+                }
+            } else {
+                // other cases
+                operandList.add((ArgumentInfo)new CoolInt(0));
+                operandList.add((ArgumentInfo)new CoolInt(i));
+                getElemPtrInstUtil(coolTypeToLLVMType(clsName, 0), operandList, res, true);
+                TypeUtils ptr = coolTypeToLLVMType(clsName, 1);
+                if ((attrTemp.value.getClass() != AST.no_expr.class)) {
+                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, cl, functionFormalNameList);
+                    storeInstUtil(new ArgumentInfo(String.valueOf(track.registerVal - 1), coolTypeToLLVMType(attrTemp.typeid, 1)), new ArgumentInfo(attrTemp.name, coolTypeToLLVMType(attrTemp.typeid, 1).getPtr()));
+                } else {
+                    out.println("\tstore " + TypeUtils.getIRRep(coolTypeToLLVMType(attrTemp.typeid, 1)) + " null , " + TypeUtils.getIRRep(coolTypeToLLVMType(attrTemp.typeid, 1)) + "* %" + attrTemp.name);
+                }
+            }
+            i++;
+        }
+        returnInstUtil(new ArgumentInfo("this1", coolTypeToLLVMType(clsName, 1)));
+    }
 
-    void returnInstUtil(ArgumentInfo op, String nameVar) {
+    void returnInstUtil(ArgumentInfo op) {
         out.print("\tret ");
         if (op.type.gt == TypeUtils.Typegt.VOID) {
             out.print("void\n");
@@ -353,6 +434,7 @@ public class LLVMIRPrinter {
     }
 
     void generateIRForMainClass(AST.program program, ClassTable classTable) {
+        visitNodeObject = new VisitNodeClass(classTable);
     	AST.class_ mainClass = null;
     	// get the main class
     	for(AST.class_ cl: program.classes){
@@ -385,11 +467,11 @@ public class LLVMIRPrinter {
             }
         }
         printCallInstruction(new ArrayList<TypeUtils>(), "Main_main", true, argList, new ArgumentInfo("0", tempTypeUtilsObject));
-        returnInstUtil((ArgumentInfo)new CoolInt(0), "");
+        returnInstUtil((ArgumentInfo)new CoolInt(0));
 
         List<TypeUtils> attrTypesList = new ArrayList<TypeUtils>();
         for(AST.attr attrTemp : classTable.getJustAttrs(mainClass.name)) {
-            attrTypesList.add(new TypeUtils(TypeUtils.Typegt.CLASS, attrTemp.typeid, 1));
+            attrTypesList.add(coolTypeToLLVMType(attrTemp.typeid, 1));
             if(attrTemp.typeid.equals("String") && attrTemp.value.getClass() == AST.string_const.class) {
                 // Means the current attribute is a string constant
                 StringUtil(attrTemp.value, 0);
@@ -399,10 +481,138 @@ public class LLVMIRPrinter {
         printClassType(mainClass.name, attrTypesList, null);
 
         // Generating code for assignment of type names
-        // generateConstructorOfClass(out, printUtil, cl.name, new InstructionInfo(), cl, classTable, functionFormalNameList);
+        generateConstructorOfClass(mainClass.name, new InstructionInfo(), mainClass, classTable);
 
         // registerCounter = new InstructionInfo();
+        registerCounter = new InstructionInfo();
 
+            // Now, we iterate over the methods of the class and generate llvm ir for that
+        for(AST.method mthdTemp : classTable.getJustMethods(mainClass.name)) {
+            // For each method,
+            // * We make a list of operand for the aList of the method, 
+            // where the first argument is a pointer to the class with name 'this'
+            // * Generate code for return type
+            // * Mangle name of class with name of function
+            // * Call the defined function
+            StringUtil(mthdTemp.body, 0);
+
+            ArrayList<ArgumentInfo> argsList = new ArrayList<ArgumentInfo>();
+            // Adding 'this' operand of function
+            argsList.add(new ArgumentInfo("this", coolTypeToLLVMType(mainClass.name, 1)));
+
+            functionFormalNameList = new ArrayList<String>();
+
+            // Adding other operands
+            for(AST.formal frmlList : mthdTemp.formals) {
+                ArgumentInfo argTemp = new ArgumentInfo(frmlList.name, coolTypeToLLVMType(frmlList.typeid, 1));
+                argsList.add(argTemp);
+                functionFormalNameList.add(frmlList.name);
+            }
+
+            String mthdMangledName = mainClass.name + "_" + mthdTemp.name;
+            if(mthdTemp.typeid.equals("Object")) {
+                mthdType = new TypeUtils(TypeUtils.Typegt.VOID);
+            } else {
+                mthdType = coolTypeToLLVMType(mthdTemp.typeid, 0);
+            }
+            beginDefinition(mthdType, mthdMangledName, argsList);
+
+            // Generating code for retval
+            TypeUtils mthdRetType = coolTypeToLLVMType(mthdTemp.typeid, 0);
+            if(mthdTemp.typeid.equals("Object") == false) {
+                ArgumentInfo retMthdVal = new ArgumentInfo("retval", coolTypeToLLVMType(mthdTemp.typeid, 0));
+                printAllocaInstruction(coolTypeToLLVMType(mthdTemp.typeid, 0), retMthdVal.name);
+            }
+
+            // Generating the alloca instructions for argsList
+            allocateMethodAttributes(argsList);
+
+            ClassPlus currentClass = classTable.getClassPlus(mainClass.name);
+            TypeUtils singlePtr = coolTypeToLLVMType(mainClass.name, 2);
+            storeInstUtil(new ArgumentInfo("this", coolTypeToLLVMType(mainClass.name, 1)), new ArgumentInfo("this" + ".addr", coolTypeToLLVMType(mainClass.name, 2)));
+            loadInstUtil(coolTypeToLLVMType(mainClass.name, 1), new ArgumentInfo("this" + ".addr", coolTypeToLLVMType(mainClass.name, 2)), new ArgumentInfo("this1", coolTypeToLLVMType(mainClass.name, 1)));
+
+            for(int i=0; i<classTable.getJustAttrs(mainClass.name).size(); i++) {
+                int flagTemp = 0;
+                for(String elem : functionFormalNameList) {
+                    if(elem.equals(classTable.getJustAttrs(mainClass.name).get(i).name)) {
+                        flagTemp = 1;
+                        break;
+                    }
+                }
+
+                if(flagTemp == 1)
+                    continue;
+
+                List<ArgumentInfo> opList = new ArrayList<ArgumentInfo>();
+                ArgumentInfo result = new ArgumentInfo(classTable.getJustAttrs(mainClass.name).get(i).name, new TypeUtils(TypeUtils.Typegt.INT32));
+                opList.add(new ArgumentInfo("this1", coolTypeToLLVMType(mainClass.name, 1)));
+                opList.add(new CoolInt(0));
+                opList.add(new CoolInt(i));
+                getElemPtrInstUtil(coolTypeToLLVMType(mainClass.name, 0), opList, result, true);
+            }
+
+            // Class Name of current class
+            String currentClassName = mainClass.name;
+            // For every method resetting The value of nested if and loop
+            nestedIfCount = 0;
+            nestedLoopCount = 0;
+            
+            /* 
+                Reinitializing the register count to zero for each method
+                Reinitializing the last instruction's type to method return type for each method
+                Entry is the first label of every method
+            */
+            registerCounter.reintialiseToDefault(0, mthdRetType, "%entry");
+            
+            registerCounter = visitNodeObject.VisitorPattern(out, this, mthdTemp.body, registerCounter, mainClass, functionFormalNameList);
+            
+            if(((mthdTemp.body.getClass() != AST.block.class) && (mthdTemp.body.getClass() != AST.loop.class) && (mthdTemp.body.getClass() != AST.cond.class))) {
+                if(registerCounter.registerVal - 1 >= 0 && mthdType.name.equals(registerCounter.lastInstructionType.name) && ((mthdType.name.equals("void")) == false)) {
+                    storeInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal - 1), mthdType), new ArgumentInfo("retval", mthdType.getPtr()));
+                }
+            }
+
+            brUncoditionUtil("fun_returning_basic_block");
+            // Label for dispatch on void fucntion
+            out.println("dispatch_on_void_basic_block:");
+            printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT8PTR), "err_msg_void_dispatch");
+            out.println("\tstore i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch");
+            loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR), new ArgumentInfo("err_msg_void_dispatch", new TypeUtils(TypeUtils.Typegt.INT8DOUBLEPTR)), new ArgumentInfo("print_err_msg_void_dispatch", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+            List<ArgumentInfo> printArguments;
+            printArguments = new ArrayList<ArgumentInfo>();
+            printArguments.add(new ArgumentInfo("print_err_msg_void_dispatch", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+            // Invoking out_string of IO to display the error message
+            callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+            // Aborting after printing the error message
+            callInstUtil(new ArrayList<TypeUtils>(), "Object_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+            brUncoditionUtil("fun_returning_basic_block");
+
+            // Creating Print and abort labels
+            out.print("func_div_by_zero_abort:\n");
+            printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT8PTR), "err_msg");
+            out.print("\tstore i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg\n");
+            loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR), new ArgumentInfo("err_msg", new TypeUtils(TypeUtils.Typegt.INT8DOUBLEPTR)), new ArgumentInfo("print_err_msg", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+            printArguments = new ArrayList<>();
+            printArguments.add(new ArgumentInfo("print_err_msg", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+            // Invoking out_string of IO to display the error message
+            callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+            // Aborting after printing the error message
+            callInstUtil(new ArrayList<TypeUtils>(), "Object_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+            brUncoditionUtil("fun_returning_basic_block");
+
+            out.print("fun_returning_basic_block:\n");
+            
+            // Printing the return type of the method
+            if(!mthdTemp.typeid.equals("Object")) {
+                loadInstUtil(mthdRetType, new ArgumentInfo("retval", mthdRetType.getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal), mthdRetType));
+                returnInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal), mthdRetType));
+                registerCounter.registerVal = registerCounter.registerVal + 1;
+                
+            } else {
+                returnInstUtil(new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+            }
+        }
 
     }
 }

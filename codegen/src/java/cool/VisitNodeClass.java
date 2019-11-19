@@ -116,7 +116,7 @@ public class VisitNodeClass {
     public InstructionInfo VisitNode(PrintWriter out, LLVMIRPrinter printUtil, AST.assign node, InstructionInfo registerCounter, AST.class_ cl, List<String> functionFormalNameList) {
         registerCounter = VisitorPattern(out, printUtil, node.e1, registerCounter, cl, functionFormalNameList);
         String newAddr = attributeAddressOfObj(node.name, cl.name, functionFormalNameList);
-        printUtil.storeInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal - 1), registerCounter.lastInstructionType), new ArgumentInfo(newAddr, registerCounter.lastInstructionType.getPtr()), null);
+        printUtil.storeInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal - 1), registerCounter.lastInstructionType), new ArgumentInfo(newAddr, registerCounter.lastInstructionType.getPtr()));
         return registerCounter;
     }
 
@@ -194,7 +194,7 @@ public class VisitNodeClass {
         out.println("\t%" + elseStmt.registerVal + " = phi " + conditionType.name + " [ %" + (thenStmt.registerVal - 1) + ", " + (thenStmt.lastBasicBlockName) + " ]" + ", " + " [ %" + (elseStmt.registerVal - 1) + ", " + (elseStmt.lastBasicBlockName) + " ]");
 
         if(elseStmt.registerVal >= 0 && LLVMIRPrinter.mthdType.name.equals(elseStmt.lastInstructionType.name) && ((LLVMIRPrinter.mthdType.name.equals("void")) == false)) {
-            printUtil.storeInstUtil(new ArgumentInfo(String.valueOf(elseStmt.registerVal), LLVMIRPrinter.mthdType), new cool.ArgumentInfo("retval", LLVMIRPrinter.mthdType.getPtr()), null);
+            printUtil.storeInstUtil(new ArgumentInfo(String.valueOf(elseStmt.registerVal), LLVMIRPrinter.mthdType), new cool.ArgumentInfo("retval", LLVMIRPrinter.mthdType.getPtr()));
         }
         return new InstructionInfo(elseStmt.registerVal + 1, conditionType, "%if.end" + String.valueOf(counter));
     }
@@ -233,7 +233,7 @@ public class VisitNodeClass {
             registerCounter = VisitorPattern(out, printUtil, exprTemp, registerCounter, cl, functionFormalNameList);
         }
         if(registerCounter.registerVal - 1 >= 0 && LLVMIRPrinter.mthdType.name.equals(registerCounter.lastInstructionType.name) && ((LLVMIRPrinter.mthdType.name.equals("void")) == false)) {
-            printUtil.storeInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal - 1), LLVMIRPrinter.mthdType), new cool.ArgumentInfo("retval", LLVMIRPrinter.mthdType.getPtr()), null);
+            printUtil.storeInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal - 1), LLVMIRPrinter.mthdType), new cool.ArgumentInfo("retval", LLVMIRPrinter.mthdType.getPtr()));
         }
         return registerCounter;
     }
@@ -251,17 +251,17 @@ public class VisitNodeClass {
             String stringLengthIr = "[" + 1 + " x i8]";
             printUtil.printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT8PTR), String.valueOf(registerCounter.registerVal));
             out.print("\tstore i8* getelementptr inbounds (" + stringLengthIr + ", " + stringLengthIr + "* @.str.empty, i32 0, i32 0), i8** %" + String.valueOf(registerCounter.registerVal) + "\n");
-            printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT8PTR)).getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), (new TypeUtils(TypeUtils.Typegt.INT8PTR))), null);
+            printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT8PTR)).getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), (new TypeUtils(TypeUtils.Typegt.INT8PTR))));
             return new InstructionInfo(registerCounter.registerVal + 2, new TypeUtils(TypeUtils.Typegt.INT8PTR), registerCounter.lastBasicBlockName);
         } else if(exprNew.typeid.equals("Bool")) {
             printUtil.printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT1), String.valueOf(registerCounter.registerVal));
-            printUtil.storeInstUtil((ArgumentInfo)new CoolBool(false), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT1)).getPtr()), null);
-            printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT1), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT1)).getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), (new TypeUtils(TypeUtils.Typegt.INT1))), null);
+            printUtil.storeInstUtil((ArgumentInfo)new CoolBool(false), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT1)).getPtr()));
+            printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT1), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT1)).getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), (new TypeUtils(TypeUtils.Typegt.INT1))));
             return new InstructionInfo(registerCounter.registerVal + 2, new TypeUtils(TypeUtils.Typegt.INT1), registerCounter.lastBasicBlockName);
         } else if(exprNew.typeid.equals("Int")) {
             printUtil.printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT32), String.valueOf(registerCounter.registerVal));
-            printUtil.storeInstUtil((ArgumentInfo)new CoolInt(0), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT32)).getPtr()), null);
-            printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT32), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT32)).getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1),(new TypeUtils(TypeUtils.Typegt.INT32))), null);
+            printUtil.storeInstUtil((ArgumentInfo)new CoolInt(0), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT32)).getPtr()));
+            printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT32), new ArgumentInfo(String.valueOf(registerCounter.registerVal), (new TypeUtils(TypeUtils.Typegt.INT32)).getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1),(new TypeUtils(TypeUtils.Typegt.INT32))));
             return new InstructionInfo(registerCounter.registerVal + 2, new TypeUtils(TypeUtils.Typegt.INT32), registerCounter.lastBasicBlockName);
         }
 
@@ -386,9 +386,9 @@ public class VisitNodeClass {
         TypeUtils operandTemp = LLVMIRPrinter.coolTypeToLLVMType(exprObj.type, 1);
 
         if(exprObj.name.equals("self")) {
-            printUtil.loadInstUtil(operandTemp, new ArgumentInfo("this1", operandTemp), new ArgumentInfo(String.valueOf(registerCounter.registerVal), operandTemp), null);
+            printUtil.loadInstUtil(operandTemp, new ArgumentInfo("this1", operandTemp), new ArgumentInfo(String.valueOf(registerCounter.registerVal), operandTemp));
         } else {
-            printUtil.loadInstUtil(operandTemp, new ArgumentInfo(attributeAddressOfObj(exprObj.name, cl.name, functionFormalNameList), operandTemp.getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal), operandTemp), null);
+            printUtil.loadInstUtil(operandTemp, new ArgumentInfo(attributeAddressOfObj(exprObj.name, cl.name, functionFormalNameList), operandTemp.getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal), operandTemp));
         }
 
         return new InstructionInfo(registerCounter.registerVal + 1, operandTemp, registerCounter.lastBasicBlockName);
@@ -397,8 +397,8 @@ public class VisitNodeClass {
     public InstructionInfo VisitNode(PrintWriter out, LLVMIRPrinter printUtil, AST.int_const expr, InstructionInfo registerCounter, AST.class_ cl, List<String> functionFormalNameList) {
         // Generating the IR for Int Constants
         printUtil.printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT32), String.valueOf(registerCounter.registerVal));
-        printUtil.storeInstUtil((ArgumentInfo)new CoolInt((expr).value), new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT32PTR)), null);
-        printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT32),  new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT32PTR)), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), new TypeUtils(TypeUtils.Typegt.INT32)), null);
+        printUtil.storeInstUtil((ArgumentInfo)new CoolInt((expr).value), new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT32PTR)));
+        printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT32),  new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT32PTR)), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), new TypeUtils(TypeUtils.Typegt.INT32)));
 
         return new InstructionInfo(registerCounter.registerVal + 2, new TypeUtils(TypeUtils.Typegt.INT32), registerCounter.lastBasicBlockName);
     }
@@ -408,7 +408,7 @@ public class VisitNodeClass {
         // Generating the IR for string constants
         printUtil.printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT8PTR), String.valueOf(registerCounter.registerVal));
         out.print("\tstore i8* getelementptr inbounds ([" + String.valueOf(stringTemp.length() + 1) + " x i8], [" + String.valueOf(stringTemp.length() + 1) + " x i8]* @.str." + stringToLineNoMapping.get(stringTemp) + ", i32 0, i32 0), i8** %" + String.valueOf(registerCounter.registerVal));
-        printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR),  new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT8DOUBLEPTR)), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), new TypeUtils(TypeUtils.Typegt.INT8PTR)), null);
+        printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR),  new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT8DOUBLEPTR)), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), new TypeUtils(TypeUtils.Typegt.INT8PTR)));
 
         return new InstructionInfo(registerCounter.registerVal + 2, new TypeUtils(TypeUtils.Typegt.INT8PTR), registerCounter.lastBasicBlockName);
     }
@@ -416,8 +416,8 @@ public class VisitNodeClass {
     public InstructionInfo VisitNode(PrintWriter out, LLVMIRPrinter printUtil, AST.bool_const expr, InstructionInfo registerCounter, AST.class_ cl, List<String> functionFormalNameList) {
         // Generating the IR for Bool Constants
         printUtil.printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT1), String.valueOf(registerCounter.registerVal));
-        printUtil.storeInstUtil((ArgumentInfo)new CoolBool((expr).value), new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT1PTR)), null);
-        printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT1),  new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT1PTR)), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), new TypeUtils(TypeUtils.Typegt.INT1)), null);
+        printUtil.storeInstUtil((ArgumentInfo)new CoolBool((expr).value), new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT1PTR)));
+        printUtil.loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT1),  new ArgumentInfo(String.valueOf(registerCounter.registerVal), new TypeUtils(TypeUtils.Typegt.INT1PTR)), new ArgumentInfo(String.valueOf(registerCounter.registerVal + 1), new TypeUtils(TypeUtils.Typegt.INT1)));
 
         return new InstructionInfo(registerCounter.registerVal + 2, new TypeUtils(TypeUtils.Typegt.INT1), registerCounter.lastBasicBlockName);
     }
