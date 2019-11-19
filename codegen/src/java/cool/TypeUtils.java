@@ -13,22 +13,31 @@ public class TypeUtils {
 
     String name;
 
-    enum TypeID {
+    enum Typegt {
         EMPTY, VOID, INT1, INT1PTR, INT1DOUBLEPTR, INT8, INT8PTR, INT8DOUBLEPTR, INT32, INT32PTR, INT32DOUBLEPTR, VARARG, OBJ, OBJPTR, OBJDOUBLEPTR, CLASS
     }
 
-    TypeID gt;
+    Typegt gt;
     int pointerDepth = 0;
-    TypeUtils(TypeUtils.TypeID t) {
+    TypeUtils(TypeUtils.Typegt t) {
         gt = t;
         name = "";
         pointerDepth = 0;
     }
 
-    TypeUtils(TypeUtils.TypeID t, String cname, int pd) {
+    TypeUtils(TypeUtils.Typegt t, String cname, int pd) {
         gt = t;
         name = cname;
         pointerDepth = pd;
+    }
+
+    // ask ask
+    TypeUtils(String cname, int pd) {
+        gt = Typegt.OBJ;
+        name = cname;
+        if(pd == 1) {
+            gt = Typegt.OBJPTR;
+        }
     }
 
     static String getIRRep(TypeUtils t) {
@@ -37,7 +46,7 @@ public class TypeUtils {
     		case EMPTY:
     			return "";
     		case VOID:
-    			return "void";
+    			return "vogt";
     		case INT1:
     			return "i1";
     		case INT1PTR:
@@ -62,5 +71,30 @@ public class TypeUtils {
                 return "%" + t.name + ps.repeat(t.pointerDepth);
     	}
     	return "";
+    }
+
+    public TypeUtils getPtr() {
+        Typegt retPtr = Typegt.EMPTY;
+        if(gt == Typegt.INT1) {
+            return (new TypeUtils(Typegt.INT1PTR));
+        } else if(gt == Typegt.INT8) {
+            return (new TypeUtils(Typegt.INT8PTR));
+        } else if(gt == Typegt.INT32) {
+            return (new TypeUtils(Typegt.INT32PTR));
+        } else if(gt == Typegt.INT1PTR) {
+            return (new TypeUtils(Typegt.INT1DOUBLEPTR));
+        } else if(gt == Typegt.INT8PTR) {
+            return (new TypeUtils(Typegt.INT8DOUBLEPTR));
+        } else if(gt == Typegt.INT32PTR) {
+            return (new TypeUtils(Typegt.INT32DOUBLEPTR));
+        } else if(gt == Typegt.OBJ) {
+            retPtr = Typegt.OBJPTR;
+        } else if(gt == Typegt.OBJPTR) {
+            retPtr = Typegt.OBJDOUBLEPTR;
+        }
+        // remove first character (%)
+        TypeUtils newType = new TypeUtils(name, 1);
+        newType.gt = retPtr;
+        return newType;
     }
 }

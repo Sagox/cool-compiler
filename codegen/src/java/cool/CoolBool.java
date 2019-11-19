@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 public class CoolBool extends CoolConstants {
     public boolean bValParam;
     CoolBool(boolean bTemp) {
-        super("", new TypeUtils(TypeUtils.TypeID.INT1));
+        super("", new TypeUtils(TypeUtils.Typegt.INT1));
         bValParam = bTemp;
         if(bTemp)
             constValue = "true";

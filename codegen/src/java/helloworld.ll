@@ -17,14 +17,14 @@ declare i32 @scanf( i8*, ... )
 
 declare i8* @malloc( i32 )
 
-declare void @exit( i32 )
+declare vogt @exit( i32 )
 
 
 define i32 @main(  ) {
 entry:
 	%Main_obj = alloca %class_Main
-	%obj1 = call %Main* @Main_Cons_Main( %class_Main %Main_obj )
-	call void @Main_main( %Main* %obj1 )
+	%obj1 = call %class_Main* @Main_Cons_Main( %class_Main %Main_obj )
+	call vogt @Main_main( %class_Main* %obj1 )
 	ret i32 %0
 }
 %class.Main = type {  }

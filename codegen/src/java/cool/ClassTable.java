@@ -6,8 +6,8 @@ import java.util.Map.Entry;
 
 
 public class ClassTable {
-	private  HashMap<String, ClassPlus> classes=new HashMap<String, ClassPlus>();		// for retrieving class related info and class attributes and features
-	private HashMap<String, Integer> height = new HashMap<String, Integer>();			// for retrieving class height in the inheritance hierarchy (for conformance check)
+	public  HashMap<String, ClassPlus> classes=new HashMap<String, ClassPlus>();		// for retrieving class related info and class attributes and features
+	public HashMap<String, Integer> height = new HashMap<String, Integer>();			// for retrieving class height in the inheritance hierarchy (for conformance check)
 	public List<Error> errors = new ArrayList<Error>();
 
 	public ClassTable() {

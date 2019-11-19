@@ -8,6 +8,7 @@ public class LLVMIRPrinter {
 	public HashMap<String, Integer> stringToLineNoMapping = new HashMap<String, Integer>();
 	public int stringLineNo = 0;
 	ArrayList<String> functionFormalNameList;
+    public static TypeUtils mthdType;
 	LLVMIRPrinter(PrintWriter tofile) {
 		out = tofile;
 	}
@@ -42,36 +43,36 @@ public class LLVMIRPrinter {
 
 		// argument type list for string functions
 		ArrayList<TypeUtils> StringFunctionArguments = new ArrayList<TypeUtils>();
-		StringFunctionArguments.add(new TypeUtils(TypeUtils.TypeID.INT8PTR));
-		StringFunctionArguments.add(new TypeUtils(TypeUtils.TypeID.INT8PTR));
+		StringFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
+		StringFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
  		// strcpy
-		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.TypeID.INT8PTR), "strcpy");
+		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT8PTR), "strcpy");
 
 		// strcmp
-		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.TypeID.INT8PTR), "strcmp");
-		StringFunctionArguments.add(new TypeUtils(TypeUtils.TypeID.INT32));
+		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT8PTR), "strcmp");
+		StringFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT32));
 
 		// strncpy
-		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.TypeID.INT8PTR), "strncpy");
+		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT8PTR), "strncpy");
 
 		// strlen
-		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.TypeID.INT8PTR))),
-			new TypeUtils(TypeUtils.TypeID.INT8PTR), "strlen");
+		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT8PTR))),
+			new TypeUtils(TypeUtils.Typegt.INT8PTR), "strlen");
 
 		ArrayList<TypeUtils> IOFunctionArguments = new ArrayList<TypeUtils>();
-		IOFunctionArguments.add(new TypeUtils(TypeUtils.TypeID.INT8PTR));
-		IOFunctionArguments.add(new TypeUtils(TypeUtils.TypeID.VARARG));
+		IOFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
+		IOFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.VARARG));
 		//printf
-		printDeclaration(IOFunctionArguments, new TypeUtils(TypeUtils.TypeID.INT32), "printf");
+		printDeclaration(IOFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT32), "printf");
 		//scanf
-		printDeclaration(IOFunctionArguments, new TypeUtils(TypeUtils.TypeID.INT32), "scanf");
+		printDeclaration(IOFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT32), "scanf");
 
 		// malloc
-		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.TypeID.INT32))),
-			new TypeUtils(TypeUtils.TypeID.INT8PTR), "malloc");
+		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT32))),
+			new TypeUtils(TypeUtils.Typegt.INT8PTR), "malloc");
 		// exit
-		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.TypeID.INT32))),
-			new TypeUtils(TypeUtils.TypeID.VOID), "exit");
+		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT32))),
+			new TypeUtils(TypeUtils.Typegt.VOID), "exit");
 
 	}
 
@@ -167,7 +168,7 @@ public class LLVMIRPrinter {
     void printCallInstruction(ArrayList<TypeUtils> argTypes, String methodName, boolean isGlobal,
     	ArrayList<ArgumentInfo> args, ArgumentInfo resultOp) {
         out.print("\t");
-        if (resultOp.type.gt == TypeUtils.TypeID.VOID) {
+        if (resultOp.type.gt == TypeUtils.Typegt.VOID) {
             out.print("call " + TypeUtils.getIRRep(resultOp.type));
         } else
         out.print(resultOp.name + " = call " + TypeUtils.getIRRep(resultOp.type));
@@ -202,18 +203,18 @@ public class LLVMIRPrinter {
         out.print(" )\n");
     }
 
-    TypeUtils coolTypeToLLVMType(String coolType, int pointerDepth) {
+    public static TypeUtils coolTypeToLLVMType(String coolType, int pointerDepth) {
     	TypeUtils tr;
     	if(coolType == "void")
-    		return new TypeUtils(TypeUtils.TypeID.VOID);
+    		return new TypeUtils(TypeUtils.Typegt.VOID);
     	else if(coolType == "String")
-    		tr = new TypeUtils(TypeUtils.TypeID.INT8PTR);
+    		tr = new TypeUtils(TypeUtils.Typegt.INT8PTR);
     	else if(coolType == "Int")
-    		tr = new TypeUtils(TypeUtils.TypeID.INT32);
+    		tr = new TypeUtils(TypeUtils.Typegt.INT32);
     	else if(coolType == "Bool")
-    		tr = new TypeUtils(TypeUtils.TypeID.INT1);
+    		tr = new TypeUtils(TypeUtils.Typegt.INT1);
     	else
-    		tr = new TypeUtils(TypeUtils.TypeID.CLASS, "class_" + coolType, pointerDepth);
+    		tr = new TypeUtils(TypeUtils.Typegt.CLASS, "class_" + coolType, pointerDepth);
     	return tr;
     }
     // print an alloca instruction
@@ -229,6 +230,38 @@ public class LLVMIRPrinter {
         out.print("\tstore " + TypeUtils.getIRRep(op.type) + " " + op.name + ", " + TypeUtils.getIRRep(result.type) + " " + result.name + "\n");
     }
 
+    void arithmeticUtil(ArgumentInfo op1, String operation, ArgumentInfo op2, ArgumentInfo result) {
+        out.print("\t");
+        if (result.type.gt != TypeUtils.Typegt.VOID) {
+            out.print(TypeUtils.getIRRep(result.type) + " = ");
+        }
+        out.print(operation + " " + TypeUtils.getIRRep(op1.type) + " " + op1.name + ", "  + op2.name + "\n");
+    }
+
+    void cmpInstUtil(ArgumentInfo op1, String cond, ArgumentInfo op2, ArgumentInfo result) {
+        out.print("\t" + result.name + " = icmp ");
+        switch(cond) {
+            case "LT":
+                out.print("slt ");
+                break;
+            case "EQ":
+                out.print("eq ");
+                break;
+            case "LE":
+                out.print("sle ");
+                break;
+        }
+        out.print(TypeUtils.getIRRep(op1.type) + " " + op1.name + ", " + op2.name + "\n");
+    }
+
+    void brConditionUtil(ArgumentInfo op, String condTrue, String condFalse) {
+        out.print("\tbr " + TypeUtils.getIRRep(op.type) + " " + op.name + ", label %" + condTrue + ", label %" + condFalse + "\n");
+    }
+
+    void brUncoditionUtil(String label) {
+        out.print("\tbr label %" + label + "\n\n");
+    }
+
     // public void generateConstructorOfClass(String clsName, InstructionInfo track, AST.class_ cl, ClassTable classTable) {
 
     //     // Name of constructor (mangled)
@@ -236,11 +269,11 @@ public class LLVMIRPrinter {
 
     //     // List of OpClass for attributes
     //     List<ArgumentInfo> attrOperandList = new ArrayList<ArgumentInfo>();
-    //     attrOperandList.add(new ArgumentInfo(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), "this"));
+    //     attrOperandList.add(new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), "this"));
 
     //     // Define the constructor and establish pointer information
-    //     beginDefinition(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), mthdName, attrOperandList);
-    //     printAllocaInstruction(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), new ArgumentInfo(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), "this.addr"));
+    //     beginDefinition(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), mthdName, attrOperandList);
+    //     printAllocaInstruction(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), "this.addr"));
 
     //     // Performing load and store operations for constructors
     //     storeInstUtil(out, new OpClass(operandType(clsName, true, 1), "this"), new OpClass(operandType(clsName, true, 2), "this" + ".addr"), null);
@@ -250,16 +283,16 @@ public class LLVMIRPrinter {
     //     int i = 0;
     //     while(i < attrListTemp.size()) {
     //         AST.attr attrTemp = attrListTemp.get(i);
-    //         ArgumentInfo res = new ArgumentInfo(attrTemp.name, new TypeUtils(TypeUtils.TypeID.INT32));
+    //         ArgumentInfo res = new ArgumentInfo(attrTemp.name, new TypeUtils(TypeUtils.Typegt.INT32));
     //         List<ArgumentInfo> operandList = new ArrayList<ArgumentInfo>();
-    //         operandList.add(new ArgumentInfo(TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1), "this1"));
+    //         operandList.add(new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1), "this1"));
 
     //         if (attrTemp.typeid.equals("Bool") == true) {
     //             // Bool attribute codegen
     //             operandList.add((ArgumentInfo)new CoolInt(0));
     //             operandList.add((ArgumentInfo)new CoolInt(i));
     //             printUtil.getElemPtrInstUtil(out, operandType(clsName, true, 0), operandList, res, true, null);
-    //             TypeUtils ptr = new TypeUtils(TypeUtils.TypeID.INT1PTR);
+    //             TypeUtils ptr = new TypeUtils(TypeUtils.Typegt.INT1PTR);
     //             if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
     //                 track = visitNodeObject.VisitorPattern(out, printUtil, attrTemp.value, track, classTable, mainClass, functionFormalNameList);
     //                 printUtil.storeInstUtil(out, new OpClass(track.lastInstructionType, String.valueOf(track.registerVal - 1)), new ArgumentInfo(track.lastInstructionType.correspondingPtrType(), attrTemp.name), null);
@@ -284,7 +317,7 @@ public class LLVMIRPrinter {
     //             operandList.add((ArgumentInfo)new CoolInt(0));
     //             operandList.add((ArgumentInfo)new CoolInt(i));
     //             getElemPtrInstUtil(TypeUtils(clsName, true, 0), operandList, res, true, null);
-    //             TypeUtils ptr = new TypeUtils(TypeUtils.TypeID.INT32PTR);
+    //             TypeUtils ptr = new TypeUtils(TypeUtils.Typegt.INT32PTR);
     //             if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
     //                 track = visitNodeObject.VisitorPattern(out, printUtil, attrTemp.value, track, classTable, mainClass, functionFormalNameList);
     //                 storeInstUtil(out, new ArgumentInfo(track.lastInstructionType, String.valueOf(track.registerVal - 1)), new ArgumentInfo(track.lastInstructionType.correspondingPtrType(), attrTemp.name), null);
@@ -296,12 +329,12 @@ public class LLVMIRPrinter {
     //             operandList.add((ArgumentInfo)new CoolInt(0));
     //             operandList.add((ArgumentInfo)new CoolInt(i));
     //             printUtil.getElemPtrInstUtil(operandType(clsName, true, 0), operandList, res, true, null);
-    //             TypeUtils ptr = TypeUtils(TypeUtils.TypeID.CLASS, clsName, 1);
+    //             TypeUtils ptr = TypeUtils(TypeUtils.Typegt.CLASS, clsName, 1);
     //             if ((attrTemp.value.getClass() != AST.no_expr.class)) {
     //                 track = visitNodeObject.VisitorPattern(printUtil, attrTemp.value, track, classTable, mainClass, functionFormalNameList);
-    //                 storeInstUtil(new ArgumentInfo(TypeUtils(TypeUtils.TypeID.CLASS, attrTemp.typeid, 1), String.valueOf(track.registerVal - 1)), new ArgumentInfo(TypeUtils(TypeUtils.TypeID.CLASS, attrTemp.typeid, 1).correspondingPtrType(), attrTemp.name), null);
+    //                 storeInstUtil(new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, attrTemp.typeid, 1), String.valueOf(track.registerVal - 1)), new ArgumentInfo(TypeUtils(TypeUtils.Typegt.CLASS, attrTemp.typeid, 1).correspondingPtrType(), attrTemp.name), null);
     //             } else {
-    //                 out.println("\tstore " + TypeUtils(TypeUtils.TypeID.CLASS, attrTemp.typeid, 1).name + " null , " + TypeUtils(attrTemp.typeid, true, 1).name + "* %" + attrTemp.name);
+    //                 out.println("\tstore " + TypeUtils(TypeUtils.Typegt.CLASS, attrTemp.typeid, 1).name + " null , " + TypeUtils(attrTemp.typeid, true, 1).name + "* %" + attrTemp.name);
     //             }
     //         }
     //         i++;
@@ -311,7 +344,7 @@ public class LLVMIRPrinter {
 
     void returnInstUtil(ArgumentInfo op, String nameVar) {
         out.print("\tret ");
-        if (op.type.gt == TypeUtils.TypeID.VOID) {
+        if (op.type.gt == TypeUtils.Typegt.VOID) {
             out.print("void\n");
         } else {
             out.print(TypeUtils.getIRRep(op.type) + " " + op.name + "\n");
@@ -329,7 +362,7 @@ public class LLVMIRPrinter {
     	}
     	// System.out.println("" + mainClass.name);
     	// the main function of llvm does what this class does
-    	beginDefinition(new TypeUtils(TypeUtils.TypeID.INT32), "main", new ArrayList<ArgumentInfo>());
+    	beginDefinition(new TypeUtils(TypeUtils.Typegt.INT32), "main", new ArrayList<ArgumentInfo>());
     	// for every class we also create an struct and constructor
     	printAllocaInstruction(coolTypeToLLVMType("Main", 0), "Main_obj");
 
@@ -338,13 +371,13 @@ public class LLVMIRPrinter {
         printCallInstruction(new ArrayList<TypeUtils>(), "Main_Cons_Main",
         	true, argList, new ArgumentInfo("obj1", coolTypeToLLVMType("Main", 1)));
         argList.set(0, new ArgumentInfo("obj1", coolTypeToLLVMType("Main", 1)));
-        TypeUtils tempTypeUtilsObject = new TypeUtils(TypeUtils.TypeID.EMPTY);
+        TypeUtils tempTypeUtilsObject = new TypeUtils(TypeUtils.Typegt.EMPTY);
         for(AST.feature ftre : mainClass.features) {
             if(ftre.getClass() == AST.method.class) {
                 AST.method mthdTemp = (AST.method)ftre;
                 if(mthdTemp.name.equals("main")) {
                     if(mthdTemp.typeid.equals("Object"))
-                        tempTypeUtilsObject = new TypeUtils(TypeUtils.TypeID.VOID);
+                        tempTypeUtilsObject = new TypeUtils(TypeUtils.Typegt.VOID);
                     else
                         tempTypeUtilsObject = coolTypeToLLVMType(mthdTemp.typeid, 0);
                     break;
@@ -356,7 +389,7 @@ public class LLVMIRPrinter {
 
         List<TypeUtils> attrTypesList = new ArrayList<TypeUtils>();
         for(AST.attr attrTemp : classTable.getJustAttrs(mainClass.name)) {
-            attrTypesList.add(new TypeUtils(TypeUtils.TypeID.CLASS, attrTemp.typeid, 1));
+            attrTypesList.add(new TypeUtils(TypeUtils.Typegt.CLASS, attrTemp.typeid, 1));
             if(attrTemp.typeid.equals("String") && attrTemp.value.getClass() == AST.string_const.class) {
                 // Means the current attribute is a string constant
                 StringUtil(attrTemp.value, 0);

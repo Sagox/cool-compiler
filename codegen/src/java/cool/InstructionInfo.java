@@ -3,11 +3,11 @@ package cool;
 import java.util.*;
 import java.io.PrintWriter;
 
-/* 
+/*
     This Class is a helper class conatining the following information for an IR instruction
     1. Register value used in that instruction
     2. Type of last instruction which is an object of TypeMapping class
-    3. Name of last basic block 
+    3. Name of last basic block
 */
 public class InstructionInfo {
     public int registerVal;
@@ -16,7 +16,7 @@ public class InstructionInfo {
 
     public InstructionInfo() {
         registerVal = 0;
-        lastInstructionType = new TypeUtils(TypeUtils.TypeID.EMPTY);
+        lastInstructionType = new TypeUtils(TypeUtils.Typegt.EMPTY);
         lastBasicBlockName = "";
     }
 
