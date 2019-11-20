@@ -34,6 +34,7 @@ public class TypeUtils {
     // ask ask
     TypeUtils(String cname, int pd) {
         gt = Typegt.OBJ;
+        pointerDepth = pd;
         name = cname;
         if(pd == 1) {
             gt = Typegt.OBJPTR;
@@ -46,7 +47,7 @@ public class TypeUtils {
     		case EMPTY:
     			return "";
     		case VOID:
-    			return "vogt";
+    			return "void";
     		case INT1:
     			return "i1";
     		case INT1PTR:
@@ -91,7 +92,8 @@ public class TypeUtils {
             retPtr = Typegt.OBJPTR;
         } else if(gt == Typegt.OBJPTR) {
             retPtr = Typegt.OBJDOUBLEPTR;
-        }
+        } else if(gt == Typegt.CLASS)
+            retPtr = Typegt.CLASS;
         // remove first character (%)
         TypeUtils newType = new TypeUtils(name, 1);
         newType.gt = retPtr;

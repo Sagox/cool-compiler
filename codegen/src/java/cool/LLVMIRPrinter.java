@@ -81,7 +81,7 @@ public class LLVMIRPrinter {
 	}
 
     void printClassType(String className, List<TypeUtils> attributes, String nameVar) {
-        out.print("%class." + className + " = type { ");
+        out.print("%class_" + className + " = type { ");
         int i = 0;
         while(i < attributes.size()) {
             if (i == attributes.size() - 1) {
@@ -97,7 +97,7 @@ public class LLVMIRPrinter {
     void beginDefinition(TypeUtils retType, String name, ArrayList<ArgumentInfo> args) {
         out.print("\ndefine " + TypeUtils.getIRRep(retType) + " @" + name + "( ");
         for(int i=0;i<args.size();i++) {
-            if (i < args.size()) {
+            if (i < args.size()-1) {
                 out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name + ", ");
             } else {
                 out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name);
@@ -128,7 +128,7 @@ public class LLVMIRPrinter {
     void callInstUtil(List<TypeUtils> argTypes, String funcName, boolean isGlobal, List<ArgumentInfo> args, ArgumentInfo resultOp) {
         out.print("\t");
         if (resultOp.type.gt == TypeUtils.Typegt.VOID) {
-            out.print("call " + resultOp.type.name);
+            out.print("call " + TypeUtils.getIRRep(resultOp.type));
         } else 
         out.print(resultOp.name + " = call " + TypeUtils.getIRRep(resultOp.type));
         int sz = argTypes.size();
@@ -304,7 +304,7 @@ public class LLVMIRPrinter {
     }
 
     void loadInstUtil(TypeUtils type, ArgumentInfo op, ArgumentInfo result) {
-        out.print("\t" + TypeUtils.getIRRep(result.type) + " = load " + TypeUtils.getIRRep(type) + ", " + TypeUtils.getIRRep(op.type) + " " + op.name + "\n");
+        out.print("\t" + result.name + " = load " + TypeUtils.getIRRep(type) + ", " + TypeUtils.getIRRep(op.type) + " " + op.name + "\n");
     }
 
     void storeInstUtil(ArgumentInfo op, ArgumentInfo result) {
@@ -449,7 +449,7 @@ public class LLVMIRPrinter {
     	printAllocaInstruction(coolTypeToLLVMType("Main", 0), "Main_obj");
 
 		ArrayList<ArgumentInfo> argList = new ArrayList<ArgumentInfo>();
-        argList.add(new ArgumentInfo("Main_obj", coolTypeToLLVMType("Main", 0)));
+        argList.add(new ArgumentInfo("Main_obj", coolTypeToLLVMType("Main", 1)));
         printCallInstruction(new ArrayList<TypeUtils>(), "Main_Cons_Main",
         	true, argList, new ArgumentInfo("obj1", coolTypeToLLVMType("Main", 1)));
         argList.set(0, new ArgumentInfo("obj1", coolTypeToLLVMType("Main", 1)));
@@ -520,8 +520,8 @@ public class LLVMIRPrinter {
             // Generating code for retval
             TypeUtils mthdRetType = coolTypeToLLVMType(mthdTemp.typeid, 0);
             if(mthdTemp.typeid.equals("Object") == false) {
-                ArgumentInfo retMthdVal = new ArgumentInfo("retval", coolTypeToLLVMType(mthdTemp.typeid, 0));
-                printAllocaInstruction(coolTypeToLLVMType(mthdTemp.typeid, 0), retMthdVal.name);
+                // ArgumentInfo retMthdVal = new ArgumentInfo("retval", coolTypeToLLVMType(mthdTemp.typeid, 0));
+                printAllocaInstruction(coolTypeToLLVMType(mthdTemp.typeid, 0), "retval");
             }
 
             // Generating the alloca instructions for argsList
