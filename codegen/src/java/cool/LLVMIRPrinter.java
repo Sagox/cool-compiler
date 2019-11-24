@@ -43,17 +43,32 @@ public class LLVMIRPrinter {
 
 	// Declarations of C functions which are used by default classes of cool
 	void printRequiredCFunctionsDeclaration() {
-		// String Methods
+        /*
+            Error handling
+        */
+        out.println("@divby0err = private unnamed_addr constant [31 x i8] c\"Runtime Error: Divide by Zero\\0A\\00\"");
+        out.println("@staticdispatchonvoiderr = private unnamed_addr constant [47 x i8] c\"Runtime Error: Static Dispatch on void object\\0A\\00\"\n");
+
+        /*
+            C format specifiers
+        */
+        out.println("@strfmt = private unnamed_addr constant [3 x i8] c\"%s\\00\"");
+        out.println("@intfmt = private unnamed_addr constant [3 x i8] c\"%d\\00\"");
+        out.println("@.str.empty = private unnamed_addr constant [1 x i8] c\"\\00\"\n");
+
+        // String Methods
 
 		// argument type list for string functions
 		ArrayList<TypeUtils> StringFunctionArguments = new ArrayList<TypeUtils>();
 		StringFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
 		StringFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        // strcat
+        printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT8PTR), "strcat");
  		// strcpy
 		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT8PTR), "strcpy");
 
 		// strcmp
-		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT8PTR), "strcmp");
+		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT32), "strcmp");
 		StringFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT32));
 
 		// strncpy
@@ -61,7 +76,7 @@ public class LLVMIRPrinter {
 
 		// strlen
 		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT8PTR))),
-			new TypeUtils(TypeUtils.Typegt.INT8PTR), "strlen");
+			new TypeUtils(TypeUtils.Typegt.INT32), "strlen");
 
 		ArrayList<TypeUtils> IOFunctionArguments = new ArrayList<TypeUtils>();
 		IOFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
@@ -129,7 +144,7 @@ public class LLVMIRPrinter {
         out.print("\t");
         if (resultOp.type.gt == TypeUtils.Typegt.VOID) {
             out.print("call " + TypeUtils.getIRRep(resultOp.type));
-        } else 
+        } else
         out.print(resultOp.name + " = call " + TypeUtils.getIRRep(resultOp.type));
         int sz = argTypes.size();
         if ( sz > 0) {
@@ -148,7 +163,7 @@ public class LLVMIRPrinter {
             out.print(" %");
         } else {
             out.print(" @");
-        } 
+        }
         out.print(funcName + "( ");
         int i = 0;
         while(i < args.size()) {
@@ -237,7 +252,7 @@ public class LLVMIRPrinter {
         else
             out.print("inbounds ");
         out.print(TypeUtils.getIRRep(type) + ", ");
-        for(int i = 0; i < operandList.size(); i++) {    
+        for(int i = 0; i < operandList.size(); i++) {
             if (i == operandList.size() - 1) {
                 out.print(TypeUtils.getIRRep(operandList.get(i).type) + " " + operandList.get(i).name + "\n");
             } else {
@@ -348,7 +363,7 @@ public class LLVMIRPrinter {
         // Name of constructor (mangled)
         String mthdName = clsName + "_Cons_" + clsName;
 
-        // List of OpClass for attributes
+        // List of ArgumentInfo for attributes
         ArrayList<ArgumentInfo> attrOperandList = new ArrayList<ArgumentInfo>();
         attrOperandList.add(new ArgumentInfo("this", coolTypeToLLVMType(clsName, 1)));
 
@@ -489,7 +504,7 @@ public class LLVMIRPrinter {
             // Now, we iterate over the methods of the class and generate llvm ir for that
         for(AST.method mthdTemp : classTable.getJustMethods(mainClass.name)) {
             // For each method,
-            // * We make a list of operand for the aList of the method, 
+            // * We make a list of operand for the aList of the method,
             // where the first argument is a pointer to the class with name 'this'
             // * Generate code for return type
             // * Mangle name of class with name of function
@@ -557,16 +572,16 @@ public class LLVMIRPrinter {
             // For every method resetting The value of nested if and loop
             nestedIfCount = 0;
             nestedLoopCount = 0;
-            
-            /* 
+
+            /*
                 Reinitializing the register count to zero for each method
                 Reinitializing the last instruction's type to method return type for each method
                 Entry is the first label of every method
             */
             registerCounter.reintialiseToDefault(0, mthdRetType, "%entry");
-            
+
             registerCounter = visitNodeObject.VisitorPattern(out, this, mthdTemp.body, registerCounter, mainClass, functionFormalNameList);
-            
+
             if(((mthdTemp.body.getClass() != AST.block.class) && (mthdTemp.body.getClass() != AST.loop.class) && (mthdTemp.body.getClass() != AST.cond.class))) {
                 if(registerCounter.registerVal - 1 >= 0 && mthdType.name.equals(registerCounter.lastInstructionType.name) && ((mthdType.name.equals("void")) == false)) {
                     storeInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal - 1), mthdType), new ArgumentInfo("retval", mthdType.getPtr()));
@@ -585,7 +600,7 @@ public class LLVMIRPrinter {
             // Invoking out_string of IO to display the error message
             callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
             // Aborting after printing the error message
-            callInstUtil(new ArrayList<TypeUtils>(), "Object_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+            callInstUtil(new ArrayList<TypeUtils>(), "OBJ_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
             brUncoditionUtil("fun_returning_basic_block");
 
             // Creating Print and abort labels
@@ -598,21 +613,343 @@ public class LLVMIRPrinter {
             // Invoking out_string of IO to display the error message
             callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
             // Aborting after printing the error message
-            callInstUtil(new ArrayList<TypeUtils>(), "Object_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+            callInstUtil(new ArrayList<TypeUtils>(), "OBJ_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
             brUncoditionUtil("fun_returning_basic_block");
 
             out.print("fun_returning_basic_block:\n");
-            
+
             // Printing the return type of the method
             if(!mthdTemp.typeid.equals("Object")) {
                 loadInstUtil(mthdRetType, new ArgumentInfo("retval", mthdRetType.getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal), mthdRetType));
                 returnInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal), mthdRetType));
                 registerCounter.registerVal = registerCounter.registerVal + 1;
-                
+
             } else {
                 returnInstUtil(new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
             }
         }
+        generateIRForClasses(program, classTable);
+    }
 
+    void generateIRForClasses(AST.program program, ClassTable classTable) {
+        // visitNodeObject = new VisitNodeClass(classTable);
+        // AST.class_ mainClass = null;
+
+        ArgumentInfo retValue;
+        ArrayList<ArgumentInfo> args;
+
+        // length
+        retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT32));
+        args = new ArrayList<ArgumentInfo>();
+        args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        beginDefinition(retValue.type, "STR_length", args);
+        callInstUtil(new ArrayList<TypeUtils>(), "strlen", true, args, retValue);
+        returnInstUtil(retValue);
+        // concat
+        retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args = new ArrayList<ArgumentInfo>();
+        args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("that", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        beginDefinition(retValue.type, "STR_concat", args);
+
+        retValue = new ArgumentInfo("memnew", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args = new ArrayList<ArgumentInfo>();
+        args.add((ArgumentInfo)new CoolInt(1024));
+        callInstUtil(new ArrayList<TypeUtils>(), "malloc", true, args, retValue);
+
+        retValue = new ArgumentInfo("copystring", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args = new ArrayList<ArgumentInfo>();
+        args.add(new ArgumentInfo("memnew", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        callInstUtil(new ArrayList<TypeUtils>(), "strcpy", true, args, retValue);
+
+        retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args = new ArrayList<ArgumentInfo>();
+        args.add(new ArgumentInfo("copystring", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("that", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        callInstUtil(new ArrayList<TypeUtils>(), "strcat", true, args, retValue);
+
+        returnInstUtil(retValue);
+        // Generating code for substr method
+        retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args = new ArrayList<ArgumentInfo>();
+        args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("start", new TypeUtils(TypeUtils.Typegt.INT32)));
+        args.add(new ArgumentInfo("len", new TypeUtils(TypeUtils.Typegt.INT32)));
+        beginDefinition(retValue.type, "STR_substr", args);
+
+        retValue = new ArgumentInfo("0", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args = new ArrayList<ArgumentInfo>();
+        args.add((ArgumentInfo)new CoolInt(1024));
+        callInstUtil(new ArrayList<TypeUtils>(), "malloc", true, args, retValue);
+
+        retValue = new ArgumentInfo("1", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args = new ArrayList<ArgumentInfo>();
+        args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("start", new TypeUtils(TypeUtils.Typegt.INT32)));
+        getElemPtrInstUtil(new TypeUtils(TypeUtils.Typegt.INT8), args, retValue, true);
+
+        retValue = new ArgumentInfo("2", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args = new ArrayList<ArgumentInfo>();
+        args.add(new ArgumentInfo("0", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("1", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("len", new TypeUtils(TypeUtils.Typegt.INT32)));
+        callInstUtil(new ArrayList<TypeUtils>(), "strncpy", true, args, retValue);
+        out.println("\t%3 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.empty, i32 0, i32 0");
+        out.println("\t%retval = call i8* @strcat( i8* %2, i8* %3 )");
+        out.println("\tret i8* %retval\n}");
+        // Generating code for strcmp method
+        retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT1));
+        args = new ArrayList<ArgumentInfo>();
+        args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("start", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        beginDefinition(retValue.type, "STR_strcmp", args);
+
+        retValue = new ArgumentInfo("0", new TypeUtils(TypeUtils.Typegt.INT32));
+        args = new ArrayList<ArgumentInfo>();
+        args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("start", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        callInstUtil(new ArrayList<TypeUtils>(), "strcmp", true, args, retValue);
+
+        cmpInstUtil(retValue, "EQ", (ArgumentInfo)new CoolInt(0), new ArgumentInfo("1", new TypeUtils(TypeUtils.Typegt.INT1)));
+
+        returnInstUtil(new ArgumentInfo("1", new TypeUtils(TypeUtils.Typegt.INT1)));
+
+        //ask ask - copy method
+
+        // Method for generating the abort method
+        retValue = new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID));
+        args = new ArrayList<ArgumentInfo>();
+        beginDefinition(retValue.type, "OBJ_abort", args);
+
+        out.println("\tcall void (i32) @exit(i32 0)");
+        out.println("\tret void\n}\n");
+        // Add other object methods later (If time permits) ask ask
+
+
+        // Method for generating the out_string method
+        args = new ArrayList<ArgumentInfo>();
+        retValue = new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID));
+        args.add(new ArgumentInfo("given", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        beginDefinition(retValue.type, "IO_out_string", args);
+
+        out.println("\t%0 = getelementptr inbounds [3 x i8], [3 x i8]* @strfmt, i32 0, i32 0");
+        out.println("\t%call = call i32 ( i8*, ... ) @printf(i8* %0, i8* %given)");
+        out.println("\tret void\n}\n");
+
+        // Method for generating the out_int method
+        args = new ArrayList<ArgumentInfo>();
+        retValue = new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID));
+        args.add(new ArgumentInfo("given", new TypeUtils(TypeUtils.Typegt.INT32)));
+        beginDefinition(retValue.type, "IO_out_int", args);
+
+        out.println("\t%0 = getelementptr inbounds [3 x i8], [3 x i8]* @intfmt, i32 0, i32 0");
+        out.println("\t%call = call i32 ( i8*, ... ) @printf(i8* %0, i32 %given)");
+        out.println("\tret void\n}\n");
+
+        // Method for generating the in_string method
+        args = new ArrayList<ArgumentInfo>();
+        beginDefinition(new TypeUtils(TypeUtils.Typegt.INT8PTR), "IO_in_string", args);
+
+        out.println("\t%0 = bitcast [3 x i8]* @strfmt to i8*");
+
+        args = new ArrayList<ArgumentInfo>();
+        retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args.add((ArgumentInfo)new CoolInt(1024));
+        callInstUtil(new ArrayList<TypeUtils>(), "malloc", true, args, retValue);
+
+        args = new ArrayList<ArgumentInfo>();
+        retValue = new ArgumentInfo("1", new TypeUtils(TypeUtils.Typegt.INT32));
+        args.add(new ArgumentInfo("0", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        List<TypeUtils> argTypes = new ArrayList<TypeUtils>();
+        argTypes.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        argTypes.add(new TypeUtils(TypeUtils.Typegt.VARARG));
+        callInstUtil(argTypes, "scanf", true, args, retValue);
+        returnInstUtil(args.get(1));
+
+        // Method for generating the in_int method
+        args = new ArrayList<ArgumentInfo>();
+        beginDefinition(new TypeUtils(TypeUtils.Typegt.INT32), "IO_in_int", args);
+
+        out.println("\t%0 = bitcast [3 x i8]* @intfmt to i8*");
+
+        args = new ArrayList<ArgumentInfo>();
+        retValue = new ArgumentInfo("1", new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        args.add((ArgumentInfo)new CoolInt(4));
+        callInstUtil(new ArrayList<TypeUtils>(), "malloc", true, args, retValue);
+
+        out.println("\t%2 = bitcast i8* %1 to i32*");
+
+        args = new ArrayList<ArgumentInfo>();
+        retValue = new ArgumentInfo("3", new TypeUtils(TypeUtils.Typegt.INT32));
+        args.add(new ArgumentInfo("0", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("2", new TypeUtils(TypeUtils.Typegt.INT32PTR)));
+        argTypes = new ArrayList<TypeUtils>();
+        argTypes.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        argTypes.add(new TypeUtils(TypeUtils.Typegt.VARARG));
+        callInstUtil(argTypes, "scanf", true, args, retValue);
+
+        retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT32));
+        loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT32), args.get(1), retValue);
+        returnInstUtil(retValue);
+
+        // get the main class
+        for(AST.class_ cl: program.classes) {
+            // if(cl.name.equals("String") || cl.name.equals("Object") || cl.name.equals("IO")) {
+            if(cl.name.equals("Object") || cl.name.equals("IO")) {
+                //object
+                printClassType(cl.name, new ArrayList<TypeUtils>(), null);
+                generateConstructorOfClass(cl.name, new InstructionInfo(), cl, classTable);
+                continue;
+            } else if ( cl.name.equals("String") || cl.name.equals("Int") || cl.name.equals("Bool") || cl.name.equals("Main")) {
+                continue;
+            }
+
+            // Traverse over the attributes of the class and generate code for them
+            List<TypeUtils> attrTypesList = new ArrayList<TypeUtils>();
+            for(AST.attr attrTemp : classTable.getJustAttrs(cl.name)) {
+                attrTypesList.add(coolTypeToLLVMType(attrTemp.typeid, 1));
+                if(attrTemp.typeid.equals("String") && attrTemp.value.getClass() == AST.string_const.class) {
+                    // Means the current attribute is a string constant
+                    StringUtil(attrTemp.value, 0);
+                }
+            }
+            // Generates the define code for attributes of class
+            printClassType(cl.name, attrTypesList, null);
+
+            // Generating code for assignment of type names
+            generateConstructorOfClass(cl.name, new InstructionInfo(), cl, classTable);
+
+            registerCounter = new InstructionInfo();
+
+            // Now, we iterate over the methods of the class and generate llvm ir for that
+            for(AST.method mthdTemp : classTable.getJustMethods(cl.name)) {
+                // For each method,
+                // * We make a list of operand for the aList of the method,
+                // where the first argument is a pointer to the class with name 'this'
+                // * Generate code for return type
+                // * Mangle name of class with name of function
+                // * Call the defined function
+                StringUtil(mthdTemp.body, 0);
+
+                ArrayList<ArgumentInfo> argsList = new ArrayList<ArgumentInfo>();
+                // Adding 'this' operand of function
+                argsList.add(new ArgumentInfo("this", coolTypeToLLVMType(cl.name, 1)));
+
+                functionFormalNameList = new ArrayList<String>();
+
+                // Adding other operands
+                for(AST.formal frmlList : mthdTemp.formals) {
+                    ArgumentInfo argTemp = new ArgumentInfo(frmlList.name, coolTypeToLLVMType(frmlList.typeid, 1));
+                    argsList.add(argTemp);
+                    functionFormalNameList.add(frmlList.name);
+                }
+
+                String mthdMangledName = cl.name + "_" + mthdTemp.name;
+                if(mthdTemp.typeid.equals("Object")) {
+                    mthdType = new TypeUtils(TypeUtils.Typegt.VOID);
+                } else {
+                    mthdType = coolTypeToLLVMType(mthdTemp.typeid, 0);
+                }
+                beginDefinition(mthdType, mthdMangledName, argsList);
+
+                // Generating code for retval
+                TypeUtils mthdRetType = coolTypeToLLVMType(mthdTemp.typeid, 0);
+                if(mthdTemp.typeid.equals("Object") == false) {
+                    // ArgumentInfo retMthdVal = new ArgumentInfo(operandType(mthdTemp.typeid, true, 0), "retval");
+                    printAllocaInstruction(coolTypeToLLVMType(mthdTemp.typeid, 0), "retval");
+                }
+
+                // Generating the alloca instructions for argsList
+                allocateMethodAttributes(argsList);
+
+                ClassPlus currentClass = classTable.getClassPlus(cl.name);
+                TypeUtils singlePtr = coolTypeToLLVMType(cl.name, 2);
+                storeInstUtil(new ArgumentInfo("this", coolTypeToLLVMType(cl.name, 1)), new ArgumentInfo("this" + ".addr", coolTypeToLLVMType(cl.name, 2)));
+                loadInstUtil(coolTypeToLLVMType(cl.name, 1), new ArgumentInfo("this" + ".addr", coolTypeToLLVMType(cl.name, 2)), new ArgumentInfo("this1", coolTypeToLLVMType(cl.name, 1)));
+
+                for(int i=0; i<currentClass.alist.size(); i++) {
+                    int flagTemp = 0;
+                    for(String elem : functionFormalNameList) {
+                        if(elem.equals(classTable.getJustAttrs(cl.name).get(i).name)) {
+                            flagTemp = 1;
+                            break;
+                        }
+                    }
+
+                    if(flagTemp == 1)
+                        continue;
+
+                    List<ArgumentInfo> opList = new ArrayList<ArgumentInfo>();
+                    ArgumentInfo result = new ArgumentInfo(classTable.getJustAttrs(cl.name).get(i).name, new TypeUtils(TypeUtils.Typegt.INT32));
+                    opList.add(new ArgumentInfo("this1", coolTypeToLLVMType(cl.name, 1)));
+                    opList.add((ArgumentInfo)new CoolInt(0));
+                    opList.add((ArgumentInfo)new CoolInt(i));
+                    getElemPtrInstUtil(coolTypeToLLVMType(cl.name, 0), opList, result, true);
+                }
+
+                // Class Name of current class
+                String currentClassName = cl.name;
+                // For every method resetting The value of nested if and loop
+                nestedIfCount = 0;
+                nestedLoopCount = 0;
+
+                /*
+                    Reinitializing the register count to zero for each method
+                    Reinitializing the last instruction's type to method return type for each method
+                    Entry is the first label of every method
+                */
+                registerCounter.reintialiseToDefault(0, mthdRetType, "%entry");
+
+                registerCounter = visitNodeObject.VisitorPattern(out, this, mthdTemp.body, registerCounter, cl, functionFormalNameList);
+
+                if(((mthdTemp.body.getClass() != AST.block.class) && (mthdTemp.body.getClass() != AST.loop.class) && (mthdTemp.body.getClass() != AST.cond.class))) {
+                    if(registerCounter.registerVal - 1 >= 0 && mthdType.name.equals(registerCounter.lastInstructionType.name) && ((mthdType.name.equals("void")) == false)) {
+                        storeInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal - 1), mthdType), new cool.ArgumentInfo("retval", mthdType.getPtr()));
+                    }
+                }
+
+                brUncoditionUtil("fun_returning_basic_block");
+                // Label for dispatch on void fucntion
+                out.println("dispatch_on_void_basic_block:");
+                printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT8PTR), "err_msg_void_dispatch");
+                out.println("\tstore i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch");
+                loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR), new ArgumentInfo("err_msg_void_dispatch", new TypeUtils(TypeUtils.Typegt.INT8DOUBLEPTR)), new ArgumentInfo("print_err_msg_void_dispatch", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+                List<ArgumentInfo> printArguments;
+                printArguments = new ArrayList<ArgumentInfo>();
+                printArguments.add(new ArgumentInfo("print_err_msg_void_dispatch", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+                // Invoking out_string of IO to display the error message
+                callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+                // Aborting after printing the error message
+                callInstUtil(new ArrayList<TypeUtils>(), "OBJ_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+                brUncoditionUtil("fun_returning_basic_block");
+
+                // Creating Print and abort labels
+                out.print("func_div_by_zero_abort:\n");
+                printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT8PTR), "err_msg");
+                out.print("\tstore i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg\n");
+                loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR), new ArgumentInfo("err_msg", new TypeUtils(TypeUtils.Typegt.INT8DOUBLEPTR)), new ArgumentInfo("print_err_msg", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+                printArguments = new ArrayList<>();
+                printArguments.add(new ArgumentInfo("print_err_msg", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+                // Invoking out_string of IO to display the error message
+                callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+                // Aborting after printing the error message
+                callInstUtil(new ArrayList<TypeUtils>(), "OBJ_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+                brUncoditionUtil("fun_returning_basic_block");
+
+                out.print("fun_returning_basic_block:\n");
+
+                // Printing the return type of the method
+                if(!mthdTemp.typeid.equals("Object")) {
+                    loadInstUtil(mthdRetType, new ArgumentInfo("retval", mthdRetType.getPtr()), new ArgumentInfo(String.valueOf(registerCounter.registerVal), mthdRetType));
+                    returnInstUtil(new ArgumentInfo(String.valueOf(registerCounter.registerVal), mthdRetType));
+                    registerCounter.registerVal = registerCounter.registerVal + 1;
+
+                } else {
+                    returnInstUtil(new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+                }
+            }
+        }
     }
 }
