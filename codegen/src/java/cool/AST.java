@@ -27,7 +27,7 @@ public class AST{
                                 ;
         }
 
-	
+
 	public static class expression extends ASTNode {
 		String type;
 		public expression(){
@@ -109,7 +109,7 @@ public class AST{
 			return space+"#"+lineNo+"\n"+space+"_eq\n"+e1.getString(space+sp)+"\n"+e2.getString(space+sp)+"\n"+space+": "+type;
 		}
 	}
-	
+
 
 	public static class leq extends expression{
 		public expression e1;
@@ -292,12 +292,12 @@ public class AST{
 			name = n;
 			actuals = a;
 			lineNo = l;
-		} 
+		}
 		String getString(String space){
 			String str;
 			str = space+"#"+lineNo+"\n"+space+"_dispatch\n"+caller.getString(space+sp)+"\n"+space+sp+name+"\n"+space+sp+"(\n";
 			for ( expression e1 : actuals ) {
-				str += e1.getString(space+sp)+"\n";	
+				str += e1.getString(space+sp)+"\n";
 			}
 			str+=space+sp+")\n"+space+": "+type;
 			return str;
@@ -319,7 +319,7 @@ public class AST{
                         String str;
                         str = space+"#"+lineNo+"\n"+space+"_static_dispatch\n"+caller.getString(space+sp)+"\n"+space+sp+typeid+"\n"+space+sp+name+"\n"+space+sp+"(\n";
                         for ( expression e1 : actuals ) {
-                                str += e1.getString(space+sp)+"\n";     
+                                str += e1.getString(space+sp)+"\n";
                         }
                         str+=space+sp+")\n"+space+": "+type;
                         return str;
@@ -445,7 +445,7 @@ public class AST{
 			for ( class_ c : classes ) {
 				str += "\n"+c.getString(space+sp);
 			}
-			
+
 			return str;
 		}
 	}

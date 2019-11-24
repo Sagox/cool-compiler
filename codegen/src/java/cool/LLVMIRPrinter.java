@@ -5,7 +5,7 @@ import java.util.*;
 
 public class LLVMIRPrinter {
 	PrintWriter out;
-	public HashMap<String, Integer> stringToLineNoMapping = new HashMap<String, Integer>();
+	public static HashMap<String, Integer> stringToLineNoMapping = new HashMap<String, Integer>();
 	public int stringLineNo = 0;
     public static Integer nestedIfCount;
     public static Integer nestedLoopCount;
@@ -358,8 +358,7 @@ public class LLVMIRPrinter {
         out.print("\tbr label %" + label + "\n\n");
     }
 
-    public void generateConstructorOfClass(String clsName, InstructionInfo track, AST.class_ cl, ClassTable classTable) {
-
+    public void generateConstructorOfClass(String clsName, InstructionInfo track, ClassTable classTable) {
         // Name of constructor (mangled)
         String mthdName = clsName + "_Cons_" + clsName;
 
@@ -390,7 +389,7 @@ public class LLVMIRPrinter {
                 getElemPtrInstUtil(coolTypeToLLVMType(clsName, 0), operandList, res, true);
                 TypeUtils ptr = new TypeUtils(TypeUtils.Typegt.INT1PTR);
                 if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
-                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, cl, functionFormalNameList);
+                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, clsName, functionFormalNameList);
                     storeInstUtil(new ArgumentInfo(String.valueOf(track.registerVal - 1), track.lastInstructionType), new ArgumentInfo(attrTemp.name, track.lastInstructionType.getPtr()));
                 } else {
                     storeInstUtil((ArgumentInfo)new CoolBool(false), new ArgumentInfo(attrTemp.name, ptr));
@@ -402,7 +401,7 @@ public class LLVMIRPrinter {
                 getElemPtrInstUtil(coolTypeToLLVMType(clsName, 0), operandList, res, true);
                 String lenString = null;
                 if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
-                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, cl, functionFormalNameList);
+                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, clsName, functionFormalNameList);
                     storeInstUtil(new ArgumentInfo(String.valueOf(track.registerVal - 1), track.lastInstructionType), new ArgumentInfo(attrTemp.name, track.lastInstructionType.getPtr()));
                 } else {
                     lenString = "[" + 1 + " x i8]";
@@ -415,7 +414,7 @@ public class LLVMIRPrinter {
                 getElemPtrInstUtil(coolTypeToLLVMType(clsName, 0), operandList, res, true);
                 TypeUtils ptr = new TypeUtils(TypeUtils.Typegt.INT32PTR);
                 if (attrTemp.value.getClass() != AST.no_expr.class && attrTemp.value.getClass() != AST.new_.class) {
-                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, cl, functionFormalNameList);
+                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, clsName, functionFormalNameList);
                     storeInstUtil(new ArgumentInfo(String.valueOf(track.registerVal - 1), track.lastInstructionType), new ArgumentInfo(attrTemp.name, track.lastInstructionType.getPtr()));
                 } else {
                     storeInstUtil((ArgumentInfo)new CoolInt(0), new ArgumentInfo(attrTemp.name, ptr));
@@ -427,7 +426,7 @@ public class LLVMIRPrinter {
                 getElemPtrInstUtil(coolTypeToLLVMType(clsName, 0), operandList, res, true);
                 TypeUtils ptr = coolTypeToLLVMType(clsName, 1);
                 if ((attrTemp.value.getClass() != AST.no_expr.class)) {
-                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, cl, functionFormalNameList);
+                    track = visitNodeObject.VisitorPattern(out, this, attrTemp.value, track, clsName, functionFormalNameList);
                     storeInstUtil(new ArgumentInfo(String.valueOf(track.registerVal - 1), coolTypeToLLVMType(attrTemp.typeid, 1)), new ArgumentInfo(attrTemp.name, coolTypeToLLVMType(attrTemp.typeid, 1).getPtr()));
                 } else {
                     out.println("\tstore " + TypeUtils.getIRRep(coolTypeToLLVMType(attrTemp.typeid, 1)) + " null , " + TypeUtils.getIRRep(coolTypeToLLVMType(attrTemp.typeid, 1)) + "* %" + attrTemp.name);
@@ -496,7 +495,7 @@ public class LLVMIRPrinter {
         printClassType(mainClass.name, attrTypesList, null);
 
         // Generating code for assignment of type names
-        generateConstructorOfClass(mainClass.name, new InstructionInfo(), mainClass, classTable);
+        generateConstructorOfClass(mainClass.name, new InstructionInfo(), classTable);
 
         // registerCounter = new InstructionInfo();
         registerCounter = new InstructionInfo();
@@ -580,7 +579,7 @@ public class LLVMIRPrinter {
             */
             registerCounter.reintialiseToDefault(0, mthdRetType, "%entry");
 
-            registerCounter = visitNodeObject.VisitorPattern(out, this, mthdTemp.body, registerCounter, mainClass, functionFormalNameList);
+            registerCounter = visitNodeObject.VisitorPattern(out, this, mthdTemp.body, registerCounter, mainClass.name, functionFormalNameList);
 
             if(((mthdTemp.body.getClass() != AST.block.class) && (mthdTemp.body.getClass() != AST.loop.class) && (mthdTemp.body.getClass() != AST.cond.class))) {
                 if(registerCounter.registerVal - 1 >= 0 && mthdType.name.equals(registerCounter.lastInstructionType.name) && ((mthdType.name.equals("void")) == false)) {
@@ -794,13 +793,18 @@ public class LLVMIRPrinter {
         loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT32), args.get(1), retValue);
         returnInstUtil(retValue);
 
+        printClassType("Object", new ArrayList<TypeUtils>(), null);
+        generateConstructorOfClass("Object", new InstructionInfo(), classTable);
+        printClassType("IO", new ArrayList<TypeUtils>(), null);
+        generateConstructorOfClass("IO", new InstructionInfo(), classTable);
+
         // get the main class
         for(AST.class_ cl: program.classes) {
             // if(cl.name.equals("String") || cl.name.equals("Object") || cl.name.equals("IO")) {
             if(cl.name.equals("Object") || cl.name.equals("IO")) {
                 //object
-                printClassType(cl.name, new ArrayList<TypeUtils>(), null);
-                generateConstructorOfClass(cl.name, new InstructionInfo(), cl, classTable);
+                // printClassType(cl.name, new ArrayList<TypeUtils>(), null);
+                // generateConstructorOfClass(cl.name, new InstructionInfo(), classTable);
                 continue;
             } else if ( cl.name.equals("String") || cl.name.equals("Int") || cl.name.equals("Bool") || cl.name.equals("Main")) {
                 continue;
@@ -819,7 +823,7 @@ public class LLVMIRPrinter {
             printClassType(cl.name, attrTypesList, null);
 
             // Generating code for assignment of type names
-            generateConstructorOfClass(cl.name, new InstructionInfo(), cl, classTable);
+            generateConstructorOfClass(cl.name, new InstructionInfo(), classTable);
 
             registerCounter = new InstructionInfo();
 
@@ -902,7 +906,7 @@ public class LLVMIRPrinter {
                 */
                 registerCounter.reintialiseToDefault(0, mthdRetType, "%entry");
 
-                registerCounter = visitNodeObject.VisitorPattern(out, this, mthdTemp.body, registerCounter, cl, functionFormalNameList);
+                registerCounter = visitNodeObject.VisitorPattern(out, this, mthdTemp.body, registerCounter, cl.name, functionFormalNameList);
 
                 if(((mthdTemp.body.getClass() != AST.block.class) && (mthdTemp.body.getClass() != AST.loop.class) && (mthdTemp.body.getClass() != AST.cond.class))) {
                     if(registerCounter.registerVal - 1 >= 0 && mthdType.name.equals(registerCounter.lastInstructionType.name) && ((mthdType.name.equals("void")) == false)) {
