@@ -1,6 +1,6 @@
 ; I am a comment in LLVM-IR. Feel free to remove me.
-; ModuleID = "test3.cl"
-source_filename = "test3.cl"
+; ModuleID = "calc.cl"
+source_filename = "calc.cl"
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 @strfmt = private unnamed_addr constant [3 x i8] c"%s\00"
@@ -36,7 +36,7 @@ entry:
 	%0 = call %class_Int @Main_main( %class_Main* %obj1 )
 	ret i32 0
 }
-%class_Main = type { %class_A*, %class_B*, %class_IO*, i32, i32, i1 }
+%class_Main = type { %class_A*, %class_IO*, %class_Int*, %class_Int* }
 
 define %class_Main* @Main_Cons_Main( %class_Main* %this ) {
 entry:
@@ -45,22 +45,15 @@ entry:
 	%this1 = load %class_Main*, %class_Main** %this.addr
 	%a = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 0
 	store %class_A* null , %class_A** %a
-	%b = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
-	store %class_B* null , %class_B** %b
-	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
+	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
 	store %class_IO* null , %class_IO** %io
-	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
+	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
 	store i32 0, i32* %i
-	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 4
+	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
 	%0 = alloca i32
 	store i32 5, i32* %0
 	%1 = load i32, i32* %0
 	store i32 %1, i32* %j
-	%k = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 5
-	%2 = alloca i1
-	store i1 true, i1* %2
-	%3 = load i1, i1* %2
-	store i1 %3, i1* %k
 	ret %class_Main* %this1
 }
 
@@ -71,11 +64,9 @@ entry:
 	store %class_Main* %this, %class_Main** %this.addr
 	%this1 = load %class_Main*, %class_Main** %this.addr
 	%a = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 0
-	%b = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
-	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
-	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
-	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 4
-	%k = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 5
+	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
+	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
+	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
 	br label %fun_returning_basic_block
 
 dispatch_on_void_basic_block:
@@ -106,11 +97,9 @@ entry:
 	store %class_Main* %this, %class_Main** %this.addr
 	%this1 = load %class_Main*, %class_Main** %this.addr
 	%a = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 0
-	%b = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
-	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
-	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
-	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 4
-	%k = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 5
+	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
+	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
+	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
 	br label %fun_returning_basic_block
 
 dispatch_on_void_basic_block:
@@ -141,11 +130,9 @@ entry:
 	store %class_Main* %this, %class_Main** %this.addr
 	%this1 = load %class_Main*, %class_Main** %this.addr
 	%a = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 0
-	%b = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
-	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
-	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
-	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 4
-	%k = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 5
+	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
+	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
+	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
 	br label %fun_returning_basic_block
 
 dispatch_on_void_basic_block:
@@ -178,11 +165,9 @@ entry:
 	store %class_Main* %this, %class_Main** %this.addr
 	%this1 = load %class_Main*, %class_Main** %this.addr
 	%a = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 0
-	%b = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
-	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
-	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
-	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 4
-	%k = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 5
+	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
+	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
+	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
 	br label %fun_returning_basic_block
 
 dispatch_on_void_basic_block:
@@ -212,11 +197,9 @@ entry:
 	store %class_Main* %this, %class_Main** %this.addr
 	%this1 = load %class_Main*, %class_Main** %this.addr
 	%a = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 0
-	%b = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
-	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
-	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
-	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 4
-	%k = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 5
+	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
+	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
+	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
 	br label %fun_returning_basic_block
 
 dispatch_on_void_basic_block:
@@ -240,7 +223,6 @@ fun_returning_basic_block:
 }
 @.str.0 = private unnamed_addr constant [26 x i8] c"Enter an integer value : \00"
 @.str.1 = private unnamed_addr constant [19 x i8] c"Its negation is : \00"
-@.str.2 = private unnamed_addr constant [32 x i8] c"\0AEnter another integer value : \00"
 
 define %class_Int @Main_main( %class_Main* %this ) {
 entry:
@@ -249,95 +231,61 @@ entry:
 	store %class_Main* %this, %class_Main** %this.addr
 	%this1 = load %class_Main*, %class_Main** %this.addr
 	%a = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 0
-	%b = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
-	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
-	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
-	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 4
-	%k = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 5
+	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
+	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
+	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
 	%0 = alloca %class_IO
 	%1 = call %class_IO* @IO_Cons_IO( %class_IO* %0 )
-	store %class_IO* %1, %class_IO** %io.addr
+	store %class_IO* %1, %class_IO* %io.addr
 	%2 = alloca %class_A
 	%3 = call %class_A* @A_Cons_A( %class_A* %2 )
-	store %class_A* %3, %class_A** %a.addr
-	%4 = alloca %class_B
-	%5 = call %class_B* @B_Cons_B( %class_B* %4 )
-	store %class_B* %5, %class_B** %b.addr
-	%6 = load %class_IO*, %class_IO** %io.addr
-	%7 = icmp eq %class_IO* null, %6
-	br i1 %7, label %dispatch_on_void_basic_block, label %branch_7
+	store %class_A* %3, %class_A* %a.addr
+	%4 = load %class_IO*, %class_IO* %io.addr
+	%5 = icmp eq class_IO null, %4
+	br i1 %5, label %dispatch_on_void_basic_block, label %branch_5
 
-proceed_7:
-	%8 = alloca i8*
-	store i8* getelementptr inbounds ([26 x i8], [26 x i8]* @.str.0, i32 0, i32 0), i8** %8	%9 = load i8*, i8** %8
-	%10 = load %class_IO*, %class_IO** %io.addr
-	%11 = call %class_IO* @IO_out_string( i8* %9 )
+proceed_5:
+	%6 = alloca i8*
+	store i8* getelementptr inbounds ([26 x i8], [26 x i8]* @.str.0, i32 0, i32 0), i8** %6	%7 = load i8*, i8** %6
+	%8 = load %class_IO*, %class_IO* %io.addr
+	%9 = call %class_IO* @IO_out_string( i8* %7 )
+	%10 = load %class_IO*, %class_IO* %io.addr
+	%11 = icmp eq class_IO null, %10
+	br i1 %11, label %dispatch_on_void_basic_block, label %branch_11
+
+proceed_11:
 	%12 = load %class_IO*, %class_IO* %io.addr
-	%13 = icmp eq class_IO null, %12
-	br i1 %13, label %dispatch_on_void_basic_block, label %branch_13
+	%13 = call i32 @IO_in_int(  )
+	store i32 %13, i32* %i.addr
+	%14 = load %class_A*, %class_A* %a.addr
+	%15 = icmp eq class_A null, %14
+	br i1 %15, label %dispatch_on_void_basic_block, label %branch_15
 
-proceed_13:
-	%14 = load %class_IO*, %class_IO* %io.addr
-	%15 = call i32 @IO_in_int(  )
-	store i32 %15, i32* %i.addr
-	%16 = load %class_A*, %class_A* %a.addr
-	%17 = icmp eq class_A null, %16
-	br i1 %17, label %dispatch_on_void_basic_block, label %branch_17
+proceed_15:
+	%16 = load %class_Int*, %class_Int* %i.addr
+	%17 = load %class_A*, %class_A* %a.addr
+	%18 = call %class_Int* @A_neg( %class_A* %17, %class_Int* %16 )
+	store %class_Int* %18, %class_Int* %i.addr
+	%19 = load %class_IO*, %class_IO* %io.addr
+	%20 = icmp eq class_IO null, %19
+	br i1 %20, label %dispatch_on_void_basic_block, label %branch_20
 
-proceed_17:
-	%18 = load %class_Int*, %class_Int* %i.addr
-	%19 = load %class_A*, %class_A* %a.addr
-	%20 = call %class_Int* @A_neg( %class_A* %19, %class_Int* %18 )
-	store %class_Int* %20, %class_Int* %i.addr
-	%21 = load %class_IO*, %class_IO* %io.addr
-	%22 = icmp eq class_IO null, %21
-	br i1 %22, label %dispatch_on_void_basic_block, label %branch_22
-
-proceed_22:
-	%23 = alloca i8*
-	store i8* getelementptr inbounds ([19 x i8], [19 x i8]* @.str.1, i32 0, i32 0), i8** %23	%24 = load i8*, i8** %23
+proceed_20:
+	%21 = alloca i8*
+	store i8* getelementptr inbounds ([19 x i8], [19 x i8]* @.str.1, i32 0, i32 0), i8** %21	%22 = load i8*, i8** %21
+	%23 = load %class_IO*, %class_IO* %io.addr
+	%24 = call %class_IO* @IO_out_string( i8* %22 )
 	%25 = load %class_IO*, %class_IO* %io.addr
-	%26 = call %class_IO* @IO_out_string( i8* %24 )
-	%27 = load %class_IO*, %class_IO* %io.addr
-	%28 = icmp eq class_IO null, %27
-	br i1 %28, label %dispatch_on_void_basic_block, label %branch_28
+	%26 = icmp eq class_IO null, %25
+	br i1 %26, label %dispatch_on_void_basic_block, label %branch_26
 
-proceed_28:
-	%29 = load %class_Int*, %class_Int* %i.addr
-	%30 = load %class_IO*, %class_IO* %io.addr
-	%31 = call %class_IO* @IO_out_int( %class_Int* %29 )
-	%32 = load %class_IO*, %class_IO* %io.addr
-	%33 = icmp eq class_IO null, %32
-	br i1 %33, label %dispatch_on_void_basic_block, label %branch_33
-
-proceed_33:
-	%34 = alloca i8*
-	store i8* getelementptr inbounds ([32 x i8], [32 x i8]* @.str.2, i32 0, i32 0), i8** %34	%35 = load i8*, i8** %34
-	%36 = load %class_IO*, %class_IO* %io.addr
-	%37 = call %class_IO* @IO_out_string( i8* %35 )
-	%38 = load %class_IO*, %class_IO* %io.addr
-	%39 = icmp eq class_IO null, %38
-	br i1 %39, label %dispatch_on_void_basic_block, label %branch_39
-
-proceed_39:
-	%40 = load %class_IO*, %class_IO* %io.addr
-	%41 = call i32 @IO_in_int(  )
-	store i32 %41, i32* %i.addr
-	%42 = load %class_B*, %class_B* %b.addr
-	%43 = icmp eq class_B null, %42
-	br i1 %43, label %dispatch_on_void_basic_block, label %branch_43
-
-proceed_43:
-	%44 = load %class_Int*, %class_Int* %i.addr
-	%45 = load %class_B*, %class_B* %b.addr
-	%46 = call %class_Int* @B_oddEven( %class_B* %45, %class_Int* %44 )
-	store %class_Int* %46, %class_Int* %j.addr
-	%47 = load %class_Bool*, %class_Bool* %k.addr
-	i1 = xor i1 %47, true
-	store i1 %48, i1* %k.addr
-	%49 = alloca i32
-	store i32 0, i32* %49
-	%50 = load i32, i32* %49
+proceed_26:
+	%27 = load %class_Int*, %class_Int* %i.addr
+	%28 = load %class_IO*, %class_IO* %io.addr
+	%29 = call %class_IO* @IO_out_int( %class_Int* %27 )
+	%30 = alloca i32
+	store i32 0, i32* %30
+	%31 = load i32, i32* %30
 	br label %fun_returning_basic_block
 
 dispatch_on_void_basic_block:
@@ -357,8 +305,8 @@ func_div_by_zero_err:
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
-	%51 = load %class_Int, %class_Int* %retval
-	ret %class_Int %51
+	%32 = load %class_Int, %class_Int* %retval
+	ret %class_Int %32
 }
 
 define %class_IO @Main_out_string( %class_Main* %this, i8* %out_string ) {
@@ -370,11 +318,9 @@ entry:
 	store %class_Main* %this, %class_Main** %this.addr
 	%this1 = load %class_Main*, %class_Main** %this.addr
 	%a = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 0
-	%b = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
-	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
-	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
-	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 4
-	%k = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 5
+	%io = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 1
+	%i = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 2
+	%j = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 3
 	br label %fun_returning_basic_block
 
 dispatch_on_void_basic_block:
@@ -703,302 +649,6 @@ entry:
 	%this1 = load %class_A*, %class_A** %this.addr
 	%a = getelementptr inbounds %class_A, %class_A* %this1, i32 0, i32 0
 	%b = getelementptr inbounds %class_A, %class_A* %this1, i32 0, i32 1
-	br label %fun_returning_basic_block
-
-dispatch_on_void_basic_block:
-	%err_msg_void_dispatch = alloca i8*
-	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
-	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
-	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-func_div_by_zero_err:
-	%err_msg = alloca i8*
-	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
-	%print_err_msg = load i8*, i8** %err_msg
-	call void @IO_out_string( i8* %print_err_msg )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-fun_returning_basic_block:
-	%0 = load %class_IO, %class_IO* %retval
-	ret %class_IO %0
-}
-%class_B = type { %class_Int*, %class_IO* }
-
-define %class_B* @B_Cons_B( %class_B* %this ) {
-entry:
-	%this.addr = alloca %class_B*
-	store %class_B* %this, %class_B** %this.addr
-	%this1 = load %class_B*, %class_B** %this.addr
-	%a = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 0
-	store i32 0, i32* %a
-	%io = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 1
-	%0 = alloca %class_IO
-	%1 = call %class_IO* @IO_Cons_IO( %class_IO* %0 )
-	store %class_IO* %1, %class_IO* %io
-	ret %class_B* %this1
-}
-
-define i32 @B_in_int( %class_B* %this ) {
-entry:
-	%retval = alloca i32
-	%this.addr = alloca %class_B*
-	store %class_B* %this, %class_B** %this.addr
-	%this1 = load %class_B*, %class_B** %this.addr
-	%a = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 0
-	%io = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 1
-	br label %fun_returning_basic_block
-
-dispatch_on_void_basic_block:
-	%err_msg_void_dispatch = alloca i8*
-	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
-	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
-	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-func_div_by_zero_err:
-	%err_msg = alloca i8*
-	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
-	%print_err_msg = load i8*, i8** %err_msg
-	call void @IO_out_string( i8* %print_err_msg )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-fun_returning_basic_block:
-	%0 = load i32, i32* %retval
-	ret i32 %0
-}
-
-define i8* @B_type_name( %class_B* %this ) {
-entry:
-	%retval = alloca i8*
-	%this.addr = alloca %class_B*
-	store %class_B* %this, %class_B** %this.addr
-	%this1 = load %class_B*, %class_B** %this.addr
-	%a = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 0
-	%io = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 1
-	br label %fun_returning_basic_block
-
-dispatch_on_void_basic_block:
-	%err_msg_void_dispatch = alloca i8*
-	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
-	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
-	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-func_div_by_zero_err:
-	%err_msg = alloca i8*
-	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
-	%print_err_msg = load i8*, i8** %err_msg
-	call void @IO_out_string( i8* %print_err_msg )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-fun_returning_basic_block:
-	%0 = load i8*, i8** %retval
-	ret i8* %0
-}
-
-define i8* @B_in_string( %class_B* %this ) {
-entry:
-	%retval = alloca i8*
-	%this.addr = alloca %class_B*
-	store %class_B* %this, %class_B** %this.addr
-	%this1 = load %class_B*, %class_B** %this.addr
-	%a = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 0
-	%io = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 1
-	br label %fun_returning_basic_block
-
-dispatch_on_void_basic_block:
-	%err_msg_void_dispatch = alloca i8*
-	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
-	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
-	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-func_div_by_zero_err:
-	%err_msg = alloca i8*
-	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
-	%print_err_msg = load i8*, i8** %err_msg
-	call void @IO_out_string( i8* %print_err_msg )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-fun_returning_basic_block:
-	%0 = load i8*, i8** %retval
-	ret i8* %0
-}
-@.str.3 = private unnamed_addr constant [9 x i8] c"Even :)\0A\00"
-@.str.4 = private unnamed_addr constant [8 x i8] c"Odd :(\0A\00"
-
-define %class_Int @B_oddEven( %class_B* %this, %class_Int* %a ) {
-entry:
-	%retval = alloca %class_Int
-	%this.addr = alloca %class_B*
-	%a.addr = alloca %class_Int*
-	store %class_Int* %a, %class_Int* %a.addr
-	store %class_B* %this, %class_B** %this.addr
-	%this1 = load %class_B*, %class_B** %this.addr
-	%io = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 1
-	br label %for.cond0
-
-
-for.cond0:
-	%0 = alloca i32
-	store i32 1, i32* %0
-	%1 = load i32, i32* %0
-	%2 = load %class_Int*, %class_Int* %a.addr
-	%3 = icmp slt i32 %1, %2
-	br i1 %3, label %for.body0, label %for.end0
-
-for.body0:
-	%4 = load %class_Int*, %class_Int* %a.addr
-	%5 = alloca i32
-	store i32 2, i32* %5
-	%6 = load i32, i32* %5
-	i32 = sub i32 %4, %6
-	store i32 %7, i32* %a.addr
-	br label %for.cond0
-
-
-for.end0:
-	%8 = load %class_Int*, %class_Int* %a.addr
-	%9 = alloca i32
-	store i32 0, i32* %9
-	%10 = load i32, i32* %9
-	br i1 %11, label %if.then0, label %if.else0
-
-if.then0:
-	%12 = load %class_IO*, %class_IO* %io.addr
-	%13 = icmp eq class_IO null, %12
-	br i1 %13, label %dispatch_on_void_basic_block, label %branch_13
-
-proceed_13:
-	%14 = alloca i8*
-	store i8* getelementptr inbounds ([9 x i8], [9 x i8]* @.str.3, i32 0, i32 0), i8** %14	%15 = load i8*, i8** %14
-	%16 = load %class_IO*, %class_IO* %io.addr
-	%17 = call %class_IO* @IO_out_string( i8* %15 )
-	br label %if.end0
-
-
-if.else0:
-	%18 = load %class_IO*, %class_IO* %io.addr
-	%19 = icmp eq class_IO null, %18
-	br i1 %19, label %dispatch_on_void_basic_block, label %branch_19
-
-proceed_19:
-	%20 = alloca i8*
-	store i8* getelementptr inbounds ([8 x i8], [8 x i8]* @.str.4, i32 0, i32 0), i8** %20	%21 = load i8*, i8** %20
-	%22 = load %class_IO*, %class_IO* %io.addr
-	%23 = call %class_IO* @IO_out_string( i8* %21 )
-	br label %if.end0
-
-
-if.end0:
-	%24 = phi class_IO [ %17, branch_14: ],  [ %23, branch_20: ]
-	%25 = alloca i32
-	store i32 0, i32* %25
-	%26 = load i32, i32* %25
-	br label %fun_returning_basic_block
-
-dispatch_on_void_basic_block:
-	%err_msg_void_dispatch = alloca i8*
-	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
-	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
-	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-func_div_by_zero_err:
-	%err_msg = alloca i8*
-	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
-	%print_err_msg = load i8*, i8** %err_msg
-	call void @IO_out_string( i8* %print_err_msg )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-fun_returning_basic_block:
-	%27 = load %class_Int, %class_Int* %retval
-	ret %class_Int %27
-}
-
-define %class_IO @B_out_int( %class_B* %this, i32 %out_int ) {
-entry:
-	%retval = alloca %class_IO
-	%this.addr = alloca %class_B*
-	%out_int.addr = alloca i32
-	store i32 %out_int, i32* %out_int.addr
-	store %class_B* %this, %class_B** %this.addr
-	%this1 = load %class_B*, %class_B** %this.addr
-	%a = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 0
-	%io = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 1
-	br label %fun_returning_basic_block
-
-dispatch_on_void_basic_block:
-	%err_msg_void_dispatch = alloca i8*
-	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
-	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
-	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-func_div_by_zero_err:
-	%err_msg = alloca i8*
-	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
-	%print_err_msg = load i8*, i8** %err_msg
-	call void @IO_out_string( i8* %print_err_msg )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-fun_returning_basic_block:
-	%0 = load %class_IO, %class_IO* %retval
-	ret %class_IO %0
-}
-
-define void @B_abort( %class_B* %this ) {
-entry:
-	%this.addr = alloca %class_B*
-	store %class_B* %this, %class_B** %this.addr
-	%this1 = load %class_B*, %class_B** %this.addr
-	%a = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 0
-	%io = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 1
-	br label %fun_returning_basic_block
-
-dispatch_on_void_basic_block:
-	%err_msg_void_dispatch = alloca i8*
-	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
-	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
-	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-func_div_by_zero_err:
-	%err_msg = alloca i8*
-	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
-	%print_err_msg = load i8*, i8** %err_msg
-	call void @IO_out_string( i8* %print_err_msg )
-	call void @Object_abort(  )
-	br label %fun_returning_basic_block
-
-fun_returning_basic_block:
-	ret void
-}
-
-define %class_IO @B_out_string( %class_B* %this, i8* %out_string ) {
-entry:
-	%retval = alloca %class_IO
-	%this.addr = alloca %class_B*
-	%out_string.addr = alloca i8*
-	store i8* %out_string, i8** %out_string.addr
-	store %class_B* %this, %class_B** %this.addr
-	%this1 = load %class_B*, %class_B** %this.addr
-	%a = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 0
-	%io = getelementptr inbounds %class_B, %class_B* %this1, i32 0, i32 1
 	br label %fun_returning_basic_block
 
 dispatch_on_void_basic_block:
