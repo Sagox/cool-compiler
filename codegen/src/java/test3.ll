@@ -3,22 +3,12 @@
 source_filename = "test3.cl"
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
-@divby0err = private unnamed_addr constant [31 x i8] c"Runtime Error: Divide by Zero\0A\00"
-@staticdispatchonvoiderr = private unnamed_addr constant [47 x i8] c"Runtime Error: Static Dispatch on void object\0A\00"
-
 @strfmt = private unnamed_addr constant [3 x i8] c"%s\00"
 @intfmt = private unnamed_addr constant [3 x i8] c"%d\00"
 @.str.empty = private unnamed_addr constant [1 x i8] c"\00"
 
-declare i8* @strcat( i8*, i8* )
-
-declare i8* @strcpy( i8*, i8* )
-
-declare i32 @strcmp( i8*, i8* )
-
-declare i8* @strncpy( i8*, i8*, i32 )
-
-declare i32 @strlen( i8* )
+@divby0err = private unnamed_addr constant [31 x i8] c"Runtime Error: Divide by Zero\0A\00"
+@staticdispatchonvoiderr = private unnamed_addr constant [47 x i8] c"Runtime Error: Static Dispatch on void object\0A\00"
 
 declare i32 @printf( i8*, ... )
 
@@ -28,6 +18,16 @@ declare i8* @malloc( i32 )
 
 declare void @exit( i32 )
 
+declare i8* @strcat( i8*, i8* )
+
+declare i32 @strcmp( i8*, i8* )
+
+declare i8* @strcpy( i8*, i8* )
+
+declare i32 @strlen( i8* )
+
+declare i8* @strncpy( i8*, i8*, i32 )
+
 
 define i32 @main(  ) {
 entry:
@@ -36,7 +36,7 @@ entry:
 	%0 = call %class_Int @Main_main( %class_Main* %obj1 )
 	ret i32 0
 }
-%class_Main = type { %class_A*, %class_B*, %class_IO*, %class_Int*, %class_Int*, %class_Bool* }
+%class_Main = type { %class_A*, %class_B*, %class_IO*, %class_Int*, %class_Int**, %class_Bool* }
 
 define %class_Main* @Main_Cons_Main( %class_Main* %this ) {
 entry:
@@ -83,15 +83,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -118,15 +118,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -153,15 +153,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -190,15 +190,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -224,15 +224,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -256,16 +256,16 @@ entry:
 	%k = getelementptr inbounds %class_Main, %class_Main* %this1, i32 0, i32 5
 	%0 = alloca %class_IO
 	%1 = call %class_IO* @IO_Cons_IO( %class_IO* %0 )
-	store %class_IO* %1, %class_IO* %io.addr
+	store %class_IO* %1, %class_IO** %io.addr
 	%2 = alloca %class_A
 	%3 = call %class_A* @A_Cons_A( %class_A* %2 )
-	store %class_A* %3, %class_A* %a.addr
+	store %class_A* %3, %class_A** %a.addr
 	%4 = alloca %class_B
 	%5 = call %class_B* @B_Cons_B( %class_B* %4 )
-	store %class_B* %5, %class_B* %b.addr
-	%6 = load %class_IO*, %class_IO* %io.addr
+	store %class_B* %5, %class_B** %b.addr
+	%6 = load %class_IO*, %class_IO** %io.addr
 	%7 = icmp eq class_IO null, %6
-	br i1 %7, label %dispatch_on_void_basic_block, label %proceed_7
+	br i1 %7, label %dispatch_on_void_basic_block, label %branch_7
 
 proceed_7:
 	%8 = alloca i8*
@@ -274,7 +274,7 @@ proceed_7:
 	%11 = call %class_IO* @IO_out_string( i8* %9 )
 	%12 = load %class_IO*, %class_IO* %io.addr
 	%13 = icmp eq class_IO null, %12
-	br i1 %13, label %dispatch_on_void_basic_block, label %proceed_13
+	br i1 %13, label %dispatch_on_void_basic_block, label %branch_13
 
 proceed_13:
 	%14 = load %class_IO*, %class_IO* %io.addr
@@ -282,7 +282,7 @@ proceed_13:
 	store i32 %15, i32* %i.addr
 	%16 = load %class_A*, %class_A* %a.addr
 	%17 = icmp eq class_A null, %16
-	br i1 %17, label %dispatch_on_void_basic_block, label %proceed_17
+	br i1 %17, label %dispatch_on_void_basic_block, label %branch_17
 
 proceed_17:
 	%18 = load %class_Int*, %class_Int* %i.addr
@@ -291,7 +291,7 @@ proceed_17:
 	store %class_Int* %20, %class_Int* %i.addr
 	%21 = load %class_IO*, %class_IO* %io.addr
 	%22 = icmp eq class_IO null, %21
-	br i1 %22, label %dispatch_on_void_basic_block, label %proceed_22
+	br i1 %22, label %dispatch_on_void_basic_block, label %branch_22
 
 proceed_22:
 	%23 = alloca i8*
@@ -300,7 +300,7 @@ proceed_22:
 	%26 = call %class_IO* @IO_out_string( i8* %24 )
 	%27 = load %class_IO*, %class_IO* %io.addr
 	%28 = icmp eq class_IO null, %27
-	br i1 %28, label %dispatch_on_void_basic_block, label %proceed_28
+	br i1 %28, label %dispatch_on_void_basic_block, label %branch_28
 
 proceed_28:
 	%29 = load %class_Int*, %class_Int* %i.addr
@@ -308,7 +308,7 @@ proceed_28:
 	%31 = call %class_IO* @IO_out_int( %class_Int* %29 )
 	%32 = load %class_IO*, %class_IO* %io.addr
 	%33 = icmp eq class_IO null, %32
-	br i1 %33, label %dispatch_on_void_basic_block, label %proceed_33
+	br i1 %33, label %dispatch_on_void_basic_block, label %branch_33
 
 proceed_33:
 	%34 = alloca i8*
@@ -317,7 +317,7 @@ proceed_33:
 	%37 = call %class_IO* @IO_out_string( i8* %35 )
 	%38 = load %class_IO*, %class_IO* %io.addr
 	%39 = icmp eq class_IO null, %38
-	br i1 %39, label %dispatch_on_void_basic_block, label %proceed_39
+	br i1 %39, label %dispatch_on_void_basic_block, label %branch_39
 
 proceed_39:
 	%40 = load %class_IO*, %class_IO* %io.addr
@@ -325,7 +325,7 @@ proceed_39:
 	store i32 %41, i32* %i.addr
 	%42 = load %class_B*, %class_B* %b.addr
 	%43 = icmp eq class_B null, %42
-	br i1 %43, label %dispatch_on_void_basic_block, label %proceed_43
+	br i1 %43, label %dispatch_on_void_basic_block, label %branch_43
 
 proceed_43:
 	%44 = load %class_Int*, %class_Int* %i.addr
@@ -345,15 +345,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -382,15 +382,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -398,21 +398,21 @@ fun_returning_basic_block:
 	ret %class_IO %0
 }
 
-define i32 @STR_length( i8* %this ) {
+define i32 @String_length( i8* %this ) {
 entry:
 	%retval = call i32 @strlen( i8* %this )
 	ret i32 %retval
 }
 
-define i8* @STR_concat( i8* %this, i8* %that ) {
+define i8* @String_concat( i8* %this, i8* %this2 ) {
 entry:
 	%memnew = call i8* @malloc( i32 1024 )
 	%copystring = call i8* @strcpy( i8* %memnew, i8* %this )
-	%retval = call i8* @strcat( i8* %copystring, i8* %that )
+	%retval = call i8* @strcat( i8* %copystring, i8* %this2 )
 	ret i8* %retval
 }
 
-define i8* @STR_substr( i8* %this, i32 %start, i32 %len ) {
+define i8* @String_substr( i8* %this, i32 %start, i32 %len ) {
 entry:
 	%0 = call i8* @malloc( i32 1024 )
 	%1 = getelementptr inbounds i8, i8* %this, i32 %start
@@ -422,14 +422,14 @@ entry:
 	ret i8* %retval
 }
 
-define i1 @STR_strcmp( i8* %this, i8* %start ) {
+define i1 @String_strcmp( i8* %this, i8* %start ) {
 entry:
 	%0 = call i32 @strcmp( i8* %this, i8* %start )
 	%1 = icmp eq i32 %0, 0
 	ret i1 %1
 }
 
-define void @OBJ_abort(  ) {
+define void @Object_abort(  ) {
 entry:
 	call void (i32) @exit(i32 0)
 	ret void
@@ -522,15 +522,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -553,15 +553,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -584,15 +584,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -615,15 +615,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -648,15 +648,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -678,15 +678,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -710,15 +710,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -756,15 +756,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -787,15 +787,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -818,15 +818,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -876,7 +876,7 @@ for.end0:
 if.then0:
 	%12 = load %class_IO*, %class_IO* %io.addr
 	%13 = icmp eq class_IO null, %12
-	br i1 %13, label %dispatch_on_void_basic_block, label %proceed_13
+	br i1 %13, label %dispatch_on_void_basic_block, label %branch_13
 
 proceed_13:
 	%14 = alloca i8*
@@ -889,7 +889,7 @@ proceed_13:
 if.else0:
 	%18 = load %class_IO*, %class_IO* %io.addr
 	%19 = icmp eq class_IO null, %18
-	br i1 %19, label %dispatch_on_void_basic_block, label %proceed_19
+	br i1 %19, label %dispatch_on_void_basic_block, label %branch_19
 
 proceed_19:
 	%20 = alloca i8*
@@ -900,7 +900,7 @@ proceed_19:
 
 
 if.end0:
-	%24 = phi class_IO [ %17, proceed_14: ],  [ %23, proceed_20: ]
+	%24 = phi class_IO [ %17, branch_14: ],  [ %23, branch_20: ]
 	%25 = alloca i32
 	store i32 0, i32* %25
 	%26 = load i32, i32* %25
@@ -911,15 +911,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -944,15 +944,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -974,15 +974,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:
@@ -1006,15 +1006,15 @@ dispatch_on_void_basic_block:
 	store i8* getelementptr inbounds ([47 x i8], [47 x i8]* @staticdispatchonvoiderr, i32 0, i32 0), i8** %err_msg_void_dispatch
 	%print_err_msg_void_dispatch = load i8*, i8** %err_msg_void_dispatch
 	call void @IO_out_string( i8* %print_err_msg_void_dispatch )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
-func_div_by_zero_abort:
+func_div_by_zero_err:
 	%err_msg = alloca i8*
 	store i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg
 	%print_err_msg = load i8*, i8** %err_msg
 	call void @IO_out_string( i8* %print_err_msg )
-	call void @OBJ_abort(  )
+	call void @Object_abort(  )
 	br label %fun_returning_basic_block
 
 fun_returning_basic_block:

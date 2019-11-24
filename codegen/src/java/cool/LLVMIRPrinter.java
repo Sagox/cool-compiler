@@ -10,7 +10,7 @@ public class LLVMIRPrinter {
     public static Integer nestedIfCount;
     public static Integer nestedLoopCount;
     public InstructionInfo registerCounter;
-    public VisitNodeClass visitNodeObject;
+    public VisitNodeByClass visitNodeObject;
 	ArrayList<String> functionFormalNameList;
     public static TypeUtils mthdType;
 	LLVMIRPrinter(PrintWriter tofile) {
@@ -29,9 +29,10 @@ public class LLVMIRPrinter {
 		out.println("target triple = \"x86_64-unknown-linux-gnu\"");
 	}
 
+    // declare + arguments
 	void printDeclaration(ArrayList<TypeUtils> args, TypeUtils retType, String name) {
         out.print("declare " + TypeUtils.getIRRep(retType) + " @" + name + "( ");
-        for(int i=0;i<args.size();i++) {
+        for(int i=0; i < args.size(); i++) {
             if (i < args.size() - 1) {
                 out.print(TypeUtils.getIRRep(args.get(i)) + ", ");
             } else {
@@ -41,70 +42,54 @@ public class LLVMIRPrinter {
         out.println(" )\n");
 	}
 
-	// Declarations of C functions which are used by default classes of cool
+	// decalrations for default
 	void printRequiredCFunctionsDeclaration() {
-        /*
-            Error handling
-        */
-        out.println("@divby0err = private unnamed_addr constant [31 x i8] c\"Runtime Error: Divide by Zero\\0A\\00\"");
-        out.println("@staticdispatchonvoiderr = private unnamed_addr constant [47 x i8] c\"Runtime Error: Static Dispatch on void object\\0A\\00\"\n");
-
-        /*
-            C format specifiers
-        */
+        // print for errors and format
         out.println("@strfmt = private unnamed_addr constant [3 x i8] c\"%s\\00\"");
         out.println("@intfmt = private unnamed_addr constant [3 x i8] c\"%d\\00\"");
         out.println("@.str.empty = private unnamed_addr constant [1 x i8] c\"\\00\"\n");
+        out.println("@divby0err = private unnamed_addr constant [31 x i8] c\"Runtime Error: Divide by Zero\\0A\\00\"");
+        out.println("@staticdispatchonvoiderr = private unnamed_addr constant [47 x i8] c\"Runtime Error: Static Dispatch on void object\\0A\\00\"\n");
+
+        // IO Methods
+        ArrayList<TypeUtils> IOFunctionArguments = new ArrayList<TypeUtils>();
+        IOFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
+        IOFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.VARARG));
+        //printf
+        printDeclaration(IOFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT32), "printf");
+        //scanf
+        printDeclaration(IOFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT32), "scanf");
+        // malloc
+        printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT32))), new TypeUtils(TypeUtils.Typegt.INT8PTR), "malloc");
+        // exit
+        printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT32))), new TypeUtils(TypeUtils.Typegt.VOID), "exit");
 
         // String Methods
-
 		// argument type list for string functions
 		ArrayList<TypeUtils> StringFunctionArguments = new ArrayList<TypeUtils>();
 		StringFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
 		StringFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
         // strcat
         printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT8PTR), "strcat");
+        // strcmp
+        printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT32), "strcmp");
  		// strcpy
 		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT8PTR), "strcpy");
-
-		// strcmp
-		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT32), "strcmp");
 		StringFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT32));
-
+        // strlen
+        printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT8PTR))), new TypeUtils(TypeUtils.Typegt.INT32), "strlen");
 		// strncpy
 		printDeclaration(StringFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT8PTR), "strncpy");
-
-		// strlen
-		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT8PTR))),
-			new TypeUtils(TypeUtils.Typegt.INT32), "strlen");
-
-		ArrayList<TypeUtils> IOFunctionArguments = new ArrayList<TypeUtils>();
-		IOFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.INT8PTR));
-		IOFunctionArguments.add(new TypeUtils(TypeUtils.Typegt.VARARG));
-		//printf
-		printDeclaration(IOFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT32), "printf");
-		//scanf
-		printDeclaration(IOFunctionArguments, new TypeUtils(TypeUtils.Typegt.INT32), "scanf");
-
-		// malloc
-		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT32))),
-			new TypeUtils(TypeUtils.Typegt.INT8PTR), "malloc");
-		// exit
-		printDeclaration(new ArrayList<TypeUtils>(Arrays.asList(new TypeUtils(TypeUtils.Typegt.INT32))),
-			new TypeUtils(TypeUtils.Typegt.VOID), "exit");
-
 	}
 
     void printClassType(String className, List<TypeUtils> attributes, String nameVar) {
         out.print("%class_" + className + " = type { ");
-        int i = 0;
-        while(i < attributes.size()) {
+        for(int i = 0; i < attributes.size(); i++) {
             if (i == attributes.size() - 1) {
                 out.print(TypeUtils.getIRRep(attributes.get(i)));
             } else {
                 out.print(TypeUtils.getIRRep(attributes.get(i)) + ", ");
             }
-            i++;
         }
         out.print(" }\n");
     }
@@ -144,19 +129,18 @@ public class LLVMIRPrinter {
         out.print("\t");
         if (resultOp.type.gt == TypeUtils.Typegt.VOID) {
             out.print("call " + TypeUtils.getIRRep(resultOp.type));
-        } else
-        out.print(resultOp.name + " = call " + TypeUtils.getIRRep(resultOp.type));
-        int sz = argTypes.size();
-        if ( sz > 0) {
+        } else {
+            out.print(resultOp.name + " = call " + TypeUtils.getIRRep(resultOp.type));
+        }
+        int size = argTypes.size();
+        if ( size > 0) {
             out.print(" (");
-            int i = 0;
-            while(i < sz) {
-                if (i == sz - 1) {
+            for (int i = 0; i < size; i++) {
+                if (i == size - 1) {
                     out.print(TypeUtils.getIRRep(argTypes.get(i)) + ") ");
                 } else {
                     out.print(TypeUtils.getIRRep(argTypes.get(i)) + ", ");
                 }
-                i++;
             }
         }
         if (isGlobal != true) {
@@ -165,14 +149,13 @@ public class LLVMIRPrinter {
             out.print(" @");
         }
         out.print(funcName + "( ");
-        int i = 0;
-        while(i < args.size()) {
-            if (i == args.size() - 1) {
+        size = args.size();
+        for(int i = 0; i < size; i++) {
+            if (i == size - 1) {
                 out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name);
             } else {
                 out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name + ", ");
             }
-            i++;
         }
         out.print(" )\n");
     }
@@ -266,19 +249,18 @@ public class LLVMIRPrinter {
         out.print("\t");
         if (resultOp.type.gt == TypeUtils.Typegt.VOID) {
             out.print("call " + TypeUtils.getIRRep(resultOp.type));
-        } else
-        out.print(resultOp.name + " = call " + TypeUtils.getIRRep(resultOp.type));
-        int sz = argTypes.size();
-        if ( sz > 0) {
+        } else {
+            out.print(resultOp.name + " = call " + TypeUtils.getIRRep(resultOp.type));
+        }
+        int size = argTypes.size();
+        if ( size > 0) {
             out.print(" (");
-            int i = 0;
-            while(i < sz) {
-                if (i == sz - 1) {
+            for (int i = 0; i < size; i++) {
+                if (i == size - 1) {
                     out.print(TypeUtils.getIRRep(argTypes.get(i)) + ") ");
                 } else {
                     out.print(TypeUtils.getIRRep(argTypes.get(i)) + ", ");
                 }
-                i++;
             }
         }
         if (isGlobal != true) {
@@ -287,14 +269,13 @@ public class LLVMIRPrinter {
             out.print(" @");
         }
         out.print(methodName + "( ");
-        int i = 0;
-        while(i < args.size()) {
-            if (i == args.size() - 1) {
+        size = args.size();
+        for(int i = 0; i < size; i++) {
+            if (i == size - 1) {
                 out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name);
             } else {
                 out.print(TypeUtils.getIRRep(args.get(i).type) + " " + args.get(i).name + ", ");
             }
-            i++;
         }
         out.print(" )\n");
     }
@@ -448,7 +429,7 @@ public class LLVMIRPrinter {
     }
 
     void generateIRForMainClass(AST.program program, ClassTable classTable) {
-        visitNodeObject = new VisitNodeClass(classTable);
+        visitNodeObject = new VisitNodeByClass(classTable);
     	AST.class_ mainClass = null;
     	// get the main class
     	for(AST.class_ cl: program.classes){
@@ -500,7 +481,7 @@ public class LLVMIRPrinter {
         // registerCounter = new InstructionInfo();
         registerCounter = new InstructionInfo();
 
-            // Now, we iterate over the methods of the class and generate llvm ir for that
+            // Now, we iterate over the methods of the class and generate llvm ir for this2
         for(AST.method mthdTemp : classTable.getJustMethods(mainClass.name)) {
             // For each method,
             // * We make a list of operand for the aList of the method,
@@ -599,11 +580,11 @@ public class LLVMIRPrinter {
             // Invoking out_string of IO to display the error message
             callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
             // Aborting after printing the error message
-            callInstUtil(new ArrayList<TypeUtils>(), "OBJ_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+            callInstUtil(new ArrayList<TypeUtils>(), "Object_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
             brUncoditionUtil("fun_returning_basic_block");
 
             // Creating Print and abort labels
-            out.print("func_div_by_zero_abort:\n");
+            out.print("func_div_by_zero_err:\n");
             printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT8PTR), "err_msg");
             out.print("\tstore i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg\n");
             loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR), new ArgumentInfo("err_msg", new TypeUtils(TypeUtils.Typegt.INT8DOUBLEPTR)), new ArgumentInfo("print_err_msg", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
@@ -612,7 +593,7 @@ public class LLVMIRPrinter {
             // Invoking out_string of IO to display the error message
             callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
             // Aborting after printing the error message
-            callInstUtil(new ArrayList<TypeUtils>(), "OBJ_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+            callInstUtil(new ArrayList<TypeUtils>(), "Object_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
             brUncoditionUtil("fun_returning_basic_block");
 
             out.print("fun_returning_basic_block:\n");
@@ -631,52 +612,49 @@ public class LLVMIRPrinter {
     }
 
     void generateIRForClasses(AST.program program, ClassTable classTable) {
-        // visitNodeObject = new VisitNodeClass(classTable);
-        // AST.class_ mainClass = null;
-
+        //print necessary IR code for base classes
         ArgumentInfo retValue;
         ArrayList<ArgumentInfo> args;
-
+        // String
         // length
         retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT32));
         args = new ArrayList<ArgumentInfo>();
         args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
-        beginDefinition(retValue.type, "STR_length", args);
+        beginDefinition(retValue.type, "String_length", args);
         callInstUtil(new ArrayList<TypeUtils>(), "strlen", true, args, retValue);
         returnInstUtil(retValue);
         // concat
         retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT8PTR));
         args = new ArrayList<ArgumentInfo>();
         args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
-        args.add(new ArgumentInfo("that", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
-        beginDefinition(retValue.type, "STR_concat", args);
-
+        args.add(new ArgumentInfo("this2", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        beginDefinition(retValue.type, "String_concat", args);
+        // malloc
         retValue = new ArgumentInfo("memnew", new TypeUtils(TypeUtils.Typegt.INT8PTR));
         args = new ArrayList<ArgumentInfo>();
         args.add((ArgumentInfo)new CoolInt(1024));
         callInstUtil(new ArrayList<TypeUtils>(), "malloc", true, args, retValue);
-
+        // strcpy
         retValue = new ArgumentInfo("copystring", new TypeUtils(TypeUtils.Typegt.INT8PTR));
         args = new ArrayList<ArgumentInfo>();
         args.add(new ArgumentInfo("memnew", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
         args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
         callInstUtil(new ArrayList<TypeUtils>(), "strcpy", true, args, retValue);
-
+        // strcat
         retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT8PTR));
         args = new ArrayList<ArgumentInfo>();
         args.add(new ArgumentInfo("copystring", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
-        args.add(new ArgumentInfo("that", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
+        args.add(new ArgumentInfo("this2", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
         callInstUtil(new ArrayList<TypeUtils>(), "strcat", true, args, retValue);
-
         returnInstUtil(retValue);
-        // Generating code for substr method
+        // substr
         retValue = new ArgumentInfo("retval", new TypeUtils(TypeUtils.Typegt.INT8PTR));
         args = new ArrayList<ArgumentInfo>();
         args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
         args.add(new ArgumentInfo("start", new TypeUtils(TypeUtils.Typegt.INT32)));
         args.add(new ArgumentInfo("len", new TypeUtils(TypeUtils.Typegt.INT32)));
-        beginDefinition(retValue.type, "STR_substr", args);
-
+        beginDefinition(retValue.type, "String_substr", args);
+        //malloc
         retValue = new ArgumentInfo("0", new TypeUtils(TypeUtils.Typegt.INT8PTR));
         args = new ArrayList<ArgumentInfo>();
         args.add((ArgumentInfo)new CoolInt(1024));
@@ -702,7 +680,7 @@ public class LLVMIRPrinter {
         args = new ArrayList<ArgumentInfo>();
         args.add(new ArgumentInfo("this", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
         args.add(new ArgumentInfo("start", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
-        beginDefinition(retValue.type, "STR_strcmp", args);
+        beginDefinition(retValue.type, "String_strcmp", args);
 
         retValue = new ArgumentInfo("0", new TypeUtils(TypeUtils.Typegt.INT32));
         args = new ArrayList<ArgumentInfo>();
@@ -714,17 +692,14 @@ public class LLVMIRPrinter {
 
         returnInstUtil(new ArgumentInfo("1", new TypeUtils(TypeUtils.Typegt.INT1)));
 
-        //ask ask - copy method
-
+        // Object
         // Method for generating the abort method
         retValue = new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID));
         args = new ArrayList<ArgumentInfo>();
-        beginDefinition(retValue.type, "OBJ_abort", args);
+        beginDefinition(retValue.type, "Object_abort", args);
 
         out.println("\tcall void (i32) @exit(i32 0)");
         out.println("\tret void\n}\n");
-        // Add other object methods later (If time permits) ask ask
-
 
         // Method for generating the out_string method
         args = new ArrayList<ArgumentInfo>();
@@ -800,11 +775,7 @@ public class LLVMIRPrinter {
 
         // get the main class
         for(AST.class_ cl: program.classes) {
-            // if(cl.name.equals("String") || cl.name.equals("Object") || cl.name.equals("IO")) {
             if(cl.name.equals("Object") || cl.name.equals("IO")) {
-                //object
-                // printClassType(cl.name, new ArrayList<TypeUtils>(), null);
-                // generateConstructorOfClass(cl.name, new InstructionInfo(), classTable);
                 continue;
             } else if ( cl.name.equals("String") || cl.name.equals("Int") || cl.name.equals("Bool") || cl.name.equals("Main")) {
                 continue;
@@ -815,19 +786,15 @@ public class LLVMIRPrinter {
             for(AST.attr attrTemp : classTable.getJustAttrs(cl.name)) {
                 attrTypesList.add(coolTypeToLLVMType(attrTemp.typeid, 1));
                 if(attrTemp.typeid.equals("String") && attrTemp.value.getClass() == AST.string_const.class) {
-                    // Means the current attribute is a string constant
                     StringUtil(attrTemp.value, 0);
                 }
             }
-            // Generates the define code for attributes of class
             printClassType(cl.name, attrTypesList, null);
-
-            // Generating code for assignment of type names
             generateConstructorOfClass(cl.name, new InstructionInfo(), classTable);
 
             registerCounter = new InstructionInfo();
 
-            // Now, we iterate over the methods of the class and generate llvm ir for that
+            // Now, we iterate over the methods of the class and generate llvm ir for this2
             for(AST.method mthdTemp : classTable.getJustMethods(cl.name)) {
                 // For each method,
                 // * We make a list of operand for the aList of the method,
@@ -926,11 +893,11 @@ public class LLVMIRPrinter {
                 // Invoking out_string of IO to display the error message
                 callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
                 // Aborting after printing the error message
-                callInstUtil(new ArrayList<TypeUtils>(), "OBJ_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+                callInstUtil(new ArrayList<TypeUtils>(), "Object_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
                 brUncoditionUtil("fun_returning_basic_block");
 
                 // Creating Print and abort labels
-                out.print("func_div_by_zero_abort:\n");
+                out.print("func_div_by_zero_err:\n");
                 printAllocaInstruction(new TypeUtils(TypeUtils.Typegt.INT8PTR), "err_msg");
                 out.print("\tstore i8* getelementptr inbounds ([31 x i8], [31 x i8]* @divby0err, i32 0, i32 0), i8** %err_msg\n");
                 loadInstUtil(new TypeUtils(TypeUtils.Typegt.INT8PTR), new ArgumentInfo("err_msg", new TypeUtils(TypeUtils.Typegt.INT8DOUBLEPTR)), new ArgumentInfo("print_err_msg", new TypeUtils(TypeUtils.Typegt.INT8PTR)));
@@ -939,7 +906,7 @@ public class LLVMIRPrinter {
                 // Invoking out_string of IO to display the error message
                 callInstUtil(new ArrayList<TypeUtils>(), "IO_out_string", true, printArguments, new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
                 // Aborting after printing the error message
-                callInstUtil(new ArrayList<TypeUtils>(), "OBJ_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
+                callInstUtil(new ArrayList<TypeUtils>(), "Object_abort", true, new ArrayList<ArgumentInfo>(), new ArgumentInfo("null", new TypeUtils(TypeUtils.Typegt.VOID)));
                 brUncoditionUtil("fun_returning_basic_block");
 
                 out.print("fun_returning_basic_block:\n");
